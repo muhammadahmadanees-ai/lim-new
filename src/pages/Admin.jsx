@@ -100,8 +100,21 @@ const Admin = () => {
             <div id="admin-collections-list" className="admin-grid">
               {collectionsList.map(col => (
                 <div key={col.id} className="admin-card">
-                  <h4>{col.name || col.title}</h4>
-                  <p>{col.description || col.desc}</p>
+                  <div 
+                    className="admin-card-img" 
+                    style={{ backgroundImage: `url(${col.img || col.image || ''})` }}
+                  >
+                    {!(col.img || col.image) && 'No Image'}
+                  </div>
+                  <div className="admin-card-content">
+                    <h4>{col.name || col.title}</h4>
+                    <p style={{ fontSize: '0.85rem', color: '#666', marginBottom: '1rem' }}>Order: {col.order ?? 0}</p>
+                    <div className="admin-actions">
+                      <span style={{flex: 1, fontSize: '0.85rem', display: 'flex', alignItems: 'center'}}>Products</span>
+                      <button className="admin-btn admin-btn-edit"><i className="fas fa-edit"></i> Edit</button>
+                      <button className="admin-btn admin-btn-delete"><i className="fas fa-trash"></i></button>
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
