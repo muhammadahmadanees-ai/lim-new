@@ -1,9 +1,30 @@
 import React from 'react';
 
-const Navbar = ({ onOrderSamples }) => {
+const Navbar = ({ onOrderSamples, onToggleDrawer }) => {
   return (
     <header id="navbar">
       <div className="container nav-container">
+        <button 
+          id="nav-menu-toggle-btn" 
+          className="menu-toggle-btn" 
+          onClick={onToggleDrawer} 
+          aria-label="Toggle Menu"
+          style={{
+            background: 'none',
+            border: 'none',
+            fontSize: '1.5rem',
+            cursor: 'pointer',
+            marginRight: '15px',
+            color: 'var(--text-color)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '4px',
+            transition: 'color 0.2s'
+          }}
+        >
+          <i className="fas fa-bars"></i>
+        </button>
         <a href="#" className="logo">
           <img
             src="https://res.cloudinary.com/doiujqcpw/image/upload/v1780002822/lim_transparent_logo_2_3_rvmif4.png"

@@ -19,7 +19,7 @@ const Admin = () => {
   const [productsList, setProductsList] = useState([]);
 
   const [isColModalOpen, setIsColModalOpen] = useState(false);
-  const [colFormData, setColFormData] = useState({ id: '', name: '', description: '', img: '', order: 0 });
+  const [colFormData, setColFormData] = useState({ id: '', name: '', description: '', img: '', order: 0, parentId: '', type: 'collection' });
 
   const [isProdModalOpen, setIsProdModalOpen] = useState(false);
   const [prodFormData, setProdFormData] = useState({ id: '', name: '', price: '', description: '', img: '', sizes: '', refcode: '', order: 0 });
@@ -55,7 +55,93 @@ const Admin = () => {
       const snapshot = await getDocs(q);
       const cols = [];
       snapshot.forEach(d => cols.push({ id: d.id, ...d.data() }));
-      setCollectionsList(cols);
+
+      // Auto-initialize categories if they do not exist
+      let changed = false;
+      
+      // Find "Tiles"
+      let tiles = cols.find(c => (c.name === "Tiles" || c.title === "Tiles") && c.type === "category");
+      let tilesId = tiles?.id;
+      if (!tilesId) {
+        console.log("Auto-seeding parent 'Tiles'");
+        const docRef = await addDoc(collection(db, "collections"), {
+          name: "Tiles",
+          description: "Explore our signature custom terrazzo tiles and slabs, crafted to stand the test of time.",
+          img: "https://res.cloudinary.com/doiujqcpw/image/upload/v1779569126/1_1_dexnnd.jpg",
+          type: "category",
+          parentId: "",
+          order: 0
+        });
+        tilesId = docRef.id;
+        changed = true;
+      }
+
+      // Find "Pressed tiles"
+      let pressed = cols.find(c => c.name === "Pressed tiles" && c.type === "category");
+      let pressedId = pressed?.id;
+      if (!pressedId) {
+        console.log("Auto-seeding subcategory 'Pressed tiles'");
+        const docRef = await addDoc(collection(db, "collections"), {
+          name: "Pressed tiles",
+          description: "Traditionally pressed tiles, highly durable and ideal for floors and high-traffic spaces.",
+          img: "https://res.cloudinary.com/doiujqcpw/image/upload/v1779569126/1_1_dexnnd.jpg",
+          type: "category",
+          parentId: tilesId,
+          order: 0
+        });
+        pressedId = docRef.id;
+        changed = true;
+      }
+
+      // Find "Non pressed tiles"
+      let nonPressed = cols.find(c => c.name === "Non pressed tiles" && c.type === "category");
+      let nonPressedId = nonPressed?.id;
+      if (!nonPressedId) {
+        console.log("Auto-seeding subcategory 'Non pressed tiles'");
+        const docRef = await addDoc(collection(db, "collections"), {
+          name: "Non pressed tiles",
+          description: "Artisan cast non-pressed slabs and tiles, custom-made for countertops, accent walls, and bespoke features.",
+          img: "https://res.cloudinary.com/doiujqcpw/image/upload/v1780237546/5_2_ysqf1w.jpg",
+          type: "category",
+          parentId: tilesId,
+          order: 1
+        });
+        nonPressedId = docRef.id;
+        changed = true;
+      }
+
+      // Update Terrazzo Tiles (t9vLeATMRrDsIHekOiSB)
+      const tilesDoc = cols.find(c => c.id === "t9vLeATMRrDsIHekOiSB");
+      if (tilesDoc && (tilesDoc.parentId !== pressedId || tilesDoc.type !== "collection")) {
+        console.log("Auto-seeding: Linking 'Terrazzo Tiles'");
+        await updateDoc(doc(db, "collections", "t9vLeATMRrDsIHekOiSB"), {
+          parentId: pressedId,
+          type: "collection"
+        });
+        changed = true;
+      }
+
+      // Update Terrazzo Slabs (Z14AdoqWwpAVpMnzZ5dl)
+      const slabsDoc = cols.find(c => c.id === "Z14AdoqWwpAVpMnzZ5dl");
+      if (slabsDoc && (slabsDoc.parentId !== nonPressedId || slabsDoc.type !== "collection")) {
+        console.log("Auto-seeding: Linking 'Terrazzo Slabs'");
+        await updateDoc(doc(db, "collections", "Z14AdoqWwpAVpMnzZ5dl"), {
+          parentId: nonPressedId,
+          type: "collection"
+        });
+        changed = true;
+      }
+
+      if (changed) {
+        // Re-fetch
+        const q2 = query(collection(db, "collections"), orderBy("order"));
+        const snapshot2 = await getDocs(q2);
+        const cols2 = [];
+        snapshot2.forEach(d => cols2.push({ id: d.id, ...d.data() }));
+        setCollectionsList(cols2);
+      } else {
+        setCollectionsList(cols);
+      }
     } catch (e) {
       console.warn("orderBy failed, falling back to unordered", e);
       const snapshot = await getDocs(collection(db, "collections"));
@@ -98,7 +184,9 @@ const Admin = () => {
       name: colFormData.name,
       description: colFormData.description,
       img: colFormData.img,
-      order: Number(colFormData.order) || 0
+      order: Number(colFormData.order) || 0,
+      parentId: colFormData.parentId || '',
+      type: colFormData.type || 'collection'
     };
     if (colFormData.id) {
       await updateDoc(doc(db, "collections", colFormData.id), data);
@@ -117,7 +205,15 @@ const Admin = () => {
   };
 
   const handleEditCollection = (col) => {
-    setColFormData({ id: col.id, name: col.name || col.title || '', description: col.description || col.desc || '', img: col.img || col.image || '', order: col.order || 0 });
+    setColFormData({ 
+      id: col.id, 
+      name: col.name || col.title || '', 
+      description: col.description || col.desc || '', 
+      img: col.img || col.image || '', 
+      order: col.order || 0,
+      parentId: col.parentId || '',
+      type: col.type || 'collection'
+    });
     setIsColModalOpen(true);
   };
 
@@ -223,19 +319,31 @@ const Admin = () => {
               <>
                 <div className="header-action">
                   <h3>Manage Collections</h3>
-                  <button className="btn" onClick={() => { setColFormData({ id: '', name: '', description: '', img: '', order: 0 }); setIsColModalOpen(true); }}><i className="fas fa-plus"></i> Add Collection</button>
+                  <button className="btn" onClick={() => { setColFormData({ id: '', name: '', description: '', img: '', order: 0, parentId: '', type: 'collection' }); setIsColModalOpen(true); }}><i className="fas fa-plus"></i> Add Collection</button>
                 </div>
                 <div id="admin-collections-list" className="admin-grid">
                   {collectionsList.map(col => (
                     <div key={col.id} className="admin-card">
-                      <div className="admin-card-img" style={{ backgroundImage: `url(${col.img || col.image || ''})` }}>
+                       <div className="admin-card-img" style={{ backgroundImage: `url(${col.img || col.image || ''})` }}>
                         {!(col.img || col.image) && 'No Image'}
                       </div>
                       <div className="admin-card-content">
                         <h4>{col.name || col.title}</h4>
+                        <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', marginBottom: '8px' }}>
+                          <span style={{ background: col.type === 'category' ? '#e0f2fe' : '#f0fdf4', color: col.type === 'category' ? '#0369a1' : '#15803d', fontSize: '0.7rem', padding: '2px 8px', borderRadius: '4px', textTransform: 'uppercase', fontWeight: 'bold' }}>
+                            {col.type || 'collection'}
+                          </span>
+                          {col.parentId && (
+                            <span style={{ background: '#f3f4f6', color: '#4b5563', fontSize: '0.7rem', padding: '2px 8px', borderRadius: '4px' }}>
+                              Parent: {collectionsList.find(p => p.id === col.parentId)?.name || 'Unknown'}
+                            </span>
+                          )}
+                        </div>
                         <p style={{ fontSize: '0.85rem', color: '#666', marginBottom: '1rem' }}>Order: {col.order ?? 0}</p>
                         <div className="admin-actions">
-                          <button className="admin-btn admin-btn-view" onClick={() => handleOpenProducts(col)}>Products</button>
+                          {col.type !== 'category' && (
+                            <button className="admin-btn admin-btn-view" onClick={() => handleOpenProducts(col)}>Products</button>
+                          )}
                           <button className="admin-btn admin-btn-edit" onClick={() => handleEditCollection(col)}><i className="fas fa-edit"></i> Edit</button>
                           <button className="admin-btn admin-btn-delete" onClick={() => handleDeleteCollection(col.id)}><i className="fas fa-trash"></i></button>
                         </div>
@@ -334,6 +442,34 @@ const Admin = () => {
               <div className="form-group" style={{ marginBottom: '1rem' }}>
                 <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500', color: 'var(--primary-color)' }}>Collection Name</label>
                 <input type="text" value={colFormData.name} onChange={e => setColFormData({...colFormData, name: e.target.value})} required style={{ width: '100%', padding: '10px 12px', border: '1px solid #ddd', borderRadius: '6px' }} />
+              </div>
+              <div className="form-group" style={{ marginBottom: '1rem' }}>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500', color: 'var(--primary-color)' }}>Type</label>
+                <select 
+                  value={colFormData.type || 'collection'} 
+                  onChange={e => setColFormData({...colFormData, type: e.target.value})} 
+                  required 
+                  style={{ width: '100%', padding: '10px 12px', border: '1px solid #ddd', borderRadius: '6px', backgroundColor: '#fff' }}
+                >
+                  <option value="collection">Product Collection (contains products)</option>
+                  <option value="category">Category Folder (contains subfolders/collections)</option>
+                </select>
+              </div>
+              <div className="form-group" style={{ marginBottom: '1rem' }}>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500', color: 'var(--primary-color)' }}>Parent Category</label>
+                <select 
+                  value={colFormData.parentId || ''} 
+                  onChange={e => setColFormData({...colFormData, parentId: e.target.value})} 
+                  style={{ width: '100%', padding: '10px 12px', border: '1px solid #ddd', borderRadius: '6px', backgroundColor: '#fff' }}
+                >
+                  <option value="">None (Root Category)</option>
+                  {collectionsList
+                    .filter(c => c.type === 'category' && c.id !== colFormData.id)
+                    .map(c => (
+                      <option key={c.id} value={c.id}>{c.name || c.title}</option>
+                    ))
+                  }
+                </select>
               </div>
               <div className="form-group" style={{ marginBottom: '1rem' }}>
                 <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500', color: 'var(--primary-color)' }}>Description</label>

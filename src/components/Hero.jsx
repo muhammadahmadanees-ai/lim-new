@@ -16,7 +16,7 @@ const Hero = () => {
           <a href="#collections" className="btn btn-primary fade-in-up delay-2">Explore Collections</a>
         </div>
         <div className="hero-video-wrapper">
-          <video autoPlay loop muted playsInline src="/IMG_0671.MP4"></video>
+          <video autoPlay loop muted playsInline src="https://res.cloudinary.com/doiujqcpw/video/upload/v1780236097/IMG_0671_cektka.mp4"></video>
         </div>
       </div>
     </section>

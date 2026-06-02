@@ -9,7 +9,8 @@ import Visualizer from '../components/Visualizer';
 import FAQ from '../components/FAQ';
 import Footer from '../components/Footer';
 
-// Modals
+// Drawer & Modals
+import MenuDrawer from '../components/MenuDrawer';
 import ProductModal from '../components/ProductModal';
 import OrderModal from '../components/OrderModal';
 import SampleFormModal from '../components/SampleFormModal';
@@ -17,6 +18,7 @@ import Lightbox from '../components/Lightbox';
 
 const Home = () => {
   const [selectedCollection, setSelectedCollection] = useState(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   
   // Modal states
   const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
@@ -59,7 +61,17 @@ const Home = () => {
 
   return (
     <div className="home-page">
-      <Navbar onOrderSamples={() => setIsOrderModalOpen(true)} />
+      <Navbar 
+        onOrderSamples={() => setIsOrderModalOpen(true)} 
+        onToggleDrawer={() => setIsDrawerOpen(true)}
+      />
+      
+      <MenuDrawer 
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        onSelectCollection={setSelectedCollection}
+        onOpenProduct={(prod) => setSelectedProduct(prod)}
+      />
       
       {!selectedCollection ? (
         <>

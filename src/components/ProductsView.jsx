@@ -66,13 +66,13 @@ const ProductsView = ({ collectionData, onBack, onOpenProduct }) => {
                 <div
                   className="img-placeholder"
                   style={prod.img ? {
-                    backgroundImage: `url('${prod.img}')`,
-                    backgroundSize: 'contain',
+                    backgroundImage: `url('${prod.img}'), linear-gradient(#ffffff, #ffffff)`,
+                    backgroundSize: 'contain, cover',
                     backgroundRepeat: 'no-repeat',
                     backgroundPosition: 'center',
                     color: 'transparent',
                     padding: '1.5rem',
-                    backgroundOrigin: 'content-box',
+                    backgroundOrigin: 'content-box, padding-box',
                     cursor: 'zoom-in'
                   } : {}}
                   title={prod.img ? 'Product Image' : ''}
