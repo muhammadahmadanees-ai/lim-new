@@ -1859,6 +1859,26 @@ input:focus, textarea:focus, select:focus {
     color: var(--brand-red);
 }
 
+.drawer-tree-node-header.expanded {
+    background: var(--brand-red);
+    color: #ffffff;
+}
+
+.drawer-tree-node-header.expanded .drawer-tree-toggle,
+.drawer-tree-node-header.expanded .node-icon,
+.drawer-tree-node-header.expanded .node-name {
+    color: #ffffff;
+}
+
+.drawer-tree-subnodes .drawer-tree-node-header {
+    background: rgba(163, 26, 30, 0.05);
+    color: var(--brand-red);
+}
+
+.drawer-tree-subnodes .drawer-tree-node-header:hover {
+    background: rgba(163, 26, 30, 0.1);
+}
+
 .drawer-tree-toggle {
     width: 16px;
     height: 16px;

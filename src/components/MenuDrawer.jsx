@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { supabase } from '../supabase';
+import RecentlyViewed from './RecentlyViewed';
 
 const MenuDrawer = ({ isOpen, onClose, onSelectCollection, onOpenProduct }) => {
   const [collections, setCollections] = useState([]);
@@ -174,7 +175,7 @@ const MenuDrawer = ({ isOpen, onClose, onSelectCollection, onOpenProduct }) => {
           return (
             <li key={node.id} className="drawer-tree-node">
               <div 
-                className="drawer-tree-node-header" 
+                className={`drawer-tree-node-header ${isCategory && isExpanded ? 'expanded' : ''}`}
                 onClick={() => {
                   if (isCategory) {
                     setExpandedNodes(prev => ({ ...prev, [node.id]: !prev[node.id] }));
@@ -332,6 +333,11 @@ const MenuDrawer = ({ isOpen, onClose, onSelectCollection, onOpenProduct }) => {
               </div>
             )}
           </div>
+
+          <RecentlyViewed onOpenProduct={(prod) => {
+            onOpenProduct(prod);
+            onClose();
+          }} />
         </div>
       </aside>
     </>

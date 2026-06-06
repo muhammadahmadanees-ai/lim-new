@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../supabase';
+import RecentlyViewed from './RecentlyViewed';
 
-const Collections = ({ onSelectCollection }) => {
+const Collections = ({ onSelectCollection, onOpenProduct }) => {
   const [collections, setCollections] = useState([]);
   const [treeRoots, setTreeRoots] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -199,6 +200,7 @@ const Collections = ({ onSelectCollection }) => {
                 </div>
                 {renderTreeNodes(treeRoots)}
               </div>
+              <RecentlyViewed onOpenProduct={onOpenProduct} />
             </aside>
 
             {/* Right Column: Active Category Content */}

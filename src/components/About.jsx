@@ -12,14 +12,14 @@ const About = () => {
           </p>
           <p>We craft every piece with precision, offering bespoke solutions for floors, walls, and custom furnishings.</p>
 
-          <div className="social-links" style={{ marginTop: '1.5rem' }}>
-            <a href="https://wa.me/4402035140483" target="_blank" rel="noreferrer" className="social-icon whatsapp">
+          <div className="about-stats">
+            <a href={`https://wa.me/923164934687?text=${encodeURIComponent("Hello LIM Factory! 👋 I visited your website and I'm interested in placing an order. Could you please help me with your terrazzo tile collections, pricing, and availability? Thank you!")}`} target="_blank" rel="noreferrer" className="social-icon whatsapp">
               <i className="fab fa-whatsapp"></i>
             </a>
             <a href="https://www.instagram.com/terrazzobylimfactory" target="_blank" rel="noreferrer" className="social-icon instagram">
               <i className="fab fa-instagram"></i>
             </a>
-            <a href="mailto:limfactoryy@gmail.com" target="_blank" rel="noreferrer" className="social-icon gmail">
+            <a href="https://mail.google.com/mail/?view=cm&to=limfactoryy@gmail.com" target="_blank" rel="noreferrer" className="social-icon gmail">
               <i className="fas fa-envelope"></i>
             </a>
           </div>

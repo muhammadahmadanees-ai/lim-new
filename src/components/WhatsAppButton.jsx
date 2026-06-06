@@ -3,8 +3,8 @@ import './WhatsAppButton.css';
 
 const WhatsAppButton = () => {
   // Replace with the actual phone number and message if needed
-  const phoneNumber = "923164934687"; // Leave blank for user to configure or use their default
-  const message = "Hello!";
+  const phoneNumber = "923164934687";
+  const message = "Hello LIM Factory! 👋 I visited your website and I'm interested in placing an order. Could you please help me with your terrazzo tile collections, pricing, and availability? Thank you!";
   const whatsappUrl = phoneNumber 
     ? `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`
     : `https://wa.me/?text=${encodeURIComponent(message)}`;

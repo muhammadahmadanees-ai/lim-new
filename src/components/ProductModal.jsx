@@ -9,7 +9,7 @@ const PREDEFINED_SIZES = [
   { id: '60x120', w: 24, h: 48 },
 ];
 
-const ProductModal = ({ product, onClose, onOpenLightbox }) => {
+const ProductModal = ({ product, onClose, onOpenLightbox, onOpenSampleForm }) => {
   const [selectedSize, setSelectedSize] = useState(null);
 
   if (!product) return null;
@@ -60,14 +60,19 @@ const ProductModal = ({ product, onClose, onOpenLightbox }) => {
 
           <div className="pm-contact-label">For orders, contact us:</div>
           <div className="pm-social-row">
-            <a href="https://wa.me/4402035140483" target="_blank" rel="noreferrer" className="pm-social-icon whatsapp" title="Order via WhatsApp"><i className="fab fa-whatsapp"></i></a>
+            <a href={`https://wa.me/923164934687?text=${encodeURIComponent(`Hello! I'm interested in the ${product.name} tile. Check it out here: ${window.location.href}`)}`} target="_blank" rel="noreferrer" className="pm-social-icon whatsapp" title="Order via WhatsApp"><i className="fab fa-whatsapp"></i></a>
             <a href="https://ig.me/m/terrazzobylimfactory" target="_blank" rel="noreferrer" className="pm-social-icon instagram" title="Order via Instagram"><i className="fab fa-instagram"></i></a>
-            <a href="mailto:limfactoryy@gmail.com" target="_blank" rel="noreferrer" className="pm-social-icon email" title="Order via Email"><i className="fas fa-envelope"></i></a>
+            <a href="https://mail.google.com/mail/?view=cm&to=limfactoryy@gmail.com" target="_blank" rel="noreferrer" className="pm-social-icon email" title="Order via Email"><i className="fas fa-envelope"></i></a>
           </div>
 
-          <button className="pm-btn-inquire" onClick={() => { document.getElementById('contact').scrollIntoView(); onClose(); }}>
-            INQUIRE NOW
-          </button>
+          <div className="pm-buttons-row">
+            <button className="pm-btn-inquire" onClick={onOpenSampleForm}>
+              REQUEST SAMPLE
+            </button>
+            <button className="pm-btn-inquire" onClick={() => { document.getElementById('contact').scrollIntoView(); onClose(); }}>
+              INQUIRE NOW
+            </button>
+          </div>
         </div>
         
       </div>

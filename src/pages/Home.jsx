@@ -26,6 +26,20 @@ const Home = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [lightboxImg, setLightboxImg] = useState(null);
 
+  const handleOpenProduct = (prod) => {
+    setSelectedProduct(prod);
+    try {
+      let history = [];
+      const stored = localStorage.getItem('lim_recently_viewed');
+      if (stored) history = JSON.parse(stored);
+      history = history.filter(i => i.id !== prod.id);
+      history.unshift({ id: prod.id, name: prod.name, img: prod.img });
+      if (history.length > 5) history = history.slice(0, 5);
+      localStorage.setItem('lim_recently_viewed', JSON.stringify(history));
+      window.dispatchEvent(new Event('recentlyViewedUpdated'));
+    } catch(e) {}
+  };
+
   useEffect(() => {
     // Sticky Nav & Scroll handling
     const navbar = document.getElementById('navbar');
@@ -70,19 +84,19 @@ const Home = () => {
         isOpen={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
         onSelectCollection={setSelectedCollection}
-        onOpenProduct={(prod) => setSelectedProduct(prod)}
+        onOpenProduct={handleOpenProduct}
       />
       
       {!selectedCollection ? (
         <>
           <Hero />
-          <Collections onSelectCollection={setSelectedCollection} />
+          <Collections onSelectCollection={setSelectedCollection} onOpenProduct={handleOpenProduct} />
         </>
       ) : (
         <ProductsView 
           collectionData={selectedCollection} 
           onBack={() => setSelectedCollection(null)} 
-          onOpenProduct={(prod) => setSelectedProduct(prod)}
+          onOpenProduct={handleOpenProduct}
         />
       )}
       
@@ -112,6 +126,10 @@ const Home = () => {
           product={selectedProduct} 
           onClose={() => setSelectedProduct(null)} 
           onOpenLightbox={(img) => setLightboxImg(img)}
+          onOpenSampleForm={() => {
+            setSelectedProduct(null);
+            setIsSampleFormOpen(true);
+          }}
         />
       )}
 
