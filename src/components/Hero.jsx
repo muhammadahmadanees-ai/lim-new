@@ -1,7 +1,17 @@
 "use client";
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 
 const Hero = () => {
+  const videoRef = useRef(null);
+
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.defaultMuted = true;
+      videoRef.current.muted = true;
+      videoRef.current.play().catch(e => console.log('Autoplay blocked:', e));
+    }
+  }, []);
+
   return (
     <section className="hero">
       <div className="hero-overlay"></div>
@@ -17,7 +27,7 @@ const Hero = () => {
           <a href="#collections" className="btn btn-primary fade-in-up delay-2">Explore Collections</a>
         </div>
         <div className="hero-video-wrapper">
-          <video autoPlay loop muted playsInline src="https://res.cloudinary.com/doiujqcpw/video/upload/v1780236097/IMG_0671_cektka.mp4"></video>
+          <video ref={videoRef} autoPlay loop muted playsInline src="https://res.cloudinary.com/doiujqcpw/video/upload/v1780236097/IMG_0671_cektka.mp4"></video>
         </div>
       </div>
     </section>

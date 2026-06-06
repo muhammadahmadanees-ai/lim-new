@@ -26,9 +26,6 @@ const Collections = ({ onSelectCollection, onOpenProduct }) => {
           }
             const catName = data.name || data.title || 'Unnamed';
             let imgUrl = data.img || data.imageurl || data.imgurl || data.image || data.pic || '';
-            if (catName === 'Tiles') {
-                imgUrl = 'https://files.catbox.moe/j6ipn4.png';
-            }
             cols.push({
               id: rawData.id,
               name: catName,
