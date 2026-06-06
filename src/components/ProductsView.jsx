@@ -7,6 +7,7 @@ const ProductsView = ({ collectionData, onBack, onOpenProduct }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     const fetchProducts = async () => {
       if (!collectionData) return;
       try {
