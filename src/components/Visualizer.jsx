@@ -16,9 +16,11 @@ const Visualizer = () => {
   useEffect(() => {
     const fetchTiles = async () => {
       try {
-        const { data: fetchedTiles, error } = await supabase.from("visualizerTiles").select('*');
+        const { data: fetchedTiles, error } = await supabase.from("products").select('id, name, img').not('img', 'is', null).order('order');
         if (error) throw error;
-        setTiles(fetchedTiles || []);
+        // Some products might have empty string or just the word 'null'
+        const validTiles = (fetchedTiles || []).filter(t => t.img && t.img.length > 5);
+        setTiles(validTiles);
       } catch (e) {
         console.error("Error fetching visualizer tiles", e);
       }
@@ -295,10 +297,16 @@ const Visualizer = () => {
             </div>
             <div className="visualizer-controls">
               <h3>Choose a Tile</h3>
-              <div id="visualizer-tiles" className="visualizer-tiles-grid">
-                {/* Simulated tile buttons */}
-                <div className="viz-tile-btn" style={{ backgroundImage: "url('/1.png')" }} onClick={() => window.visualizerSelectTile('/1.png')}></div>
-                <div className="viz-tile-btn" style={{ backgroundImage: "url('/2.png')" }} onClick={() => window.visualizerSelectTile('/2.png')}></div>
+              <div id="visualizer-tiles" className="visualizer-tiles-grid" style={{ maxHeight: '250px', overflowY: 'auto' }}>
+                {tiles.length === 0 ? <p style={{fontSize:'0.8rem', color:'#888'}}>Loading tiles...</p> : tiles.map(tile => (
+                  <div 
+                    key={tile.id} 
+                    className="viz-tile-btn" 
+                    title={tile.name} 
+                    style={{ backgroundImage: `url('${tile.img}')` }} 
+                    onClick={() => window.visualizerSelectTile(tile.img)}
+                  ></div>
+                ))}
               </div>
               <div className="visualizer-sliders">
                 <label>Tile Opacity <span id="opacity-val" ref={opacityValRef}>90%</span></label>
