@@ -61,7 +61,8 @@ const Contact = () => {
           <h2>Contact Us</h2>
           <ul className="contact-details">
             <li><strong>Email:</strong> limfactoryy@gmail.com</li>
-            <li><strong>Phone:</strong> +92 316 4934 987</li>
+            <li><strong>Phone 1:</strong> +92 316 4934 687</li>
+            <li><strong>Phone 2:</strong> +92 333 7000 737</li>
           </ul>
           <div className="about-stats" style={{ marginTop: '20px', justifyContent: 'flex-start' }}>
             <a href={`https://wa.me/923164934687?text=${encodeURIComponent("Hello LIM Factory! 👋 I visited your website and I'm interested in placing an order. Could you please help me with your terrazzo tile collections, pricing, and availability? Thank you!")}`} target="_blank" rel="noreferrer" className="social-icon whatsapp">
