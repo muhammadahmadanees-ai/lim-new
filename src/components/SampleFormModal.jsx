@@ -2,9 +2,12 @@
 import React, { useState } from 'react';
 import { supabase } from '../supabase';
 
-const SampleFormModal = ({ onClose }) => {
+const SampleFormModal = ({ onClose, initialProduct }) => {
   const [formData, setFormData] = useState({
-    name: '', email: '', phone: '', collection: '', tile: '', quantity: '',
+    name: '', email: '', phone: '', 
+    collection: initialProduct?.collection || '', 
+    tile: initialProduct?.name || '', 
+    quantity: '',
     address: '', city: '', postcode: '', country: '', notes: ''
   });
   const [status, setStatus] = useState('idle');

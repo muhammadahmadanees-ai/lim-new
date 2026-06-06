@@ -24,6 +24,7 @@ const Home = () => {
   // Modal states
   const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
   const [isSampleFormOpen, setIsSampleFormOpen] = useState(false);
+  const [sampleProduct, setSampleProduct] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [lightboxImg, setLightboxImg] = useState(null);
 
@@ -34,7 +35,7 @@ const Home = () => {
       const stored = localStorage.getItem('lim_recently_viewed');
       if (stored) history = JSON.parse(stored);
       history = history.filter(i => i.id !== prod.id);
-      history.unshift({ id: prod.id, name: prod.name, img: prod.img });
+      history.unshift({ ...prod });
       if (history.length > 5) history = history.slice(0, 5);
       localStorage.setItem('lim_recently_viewed', JSON.stringify(history));
       window.dispatchEvent(new Event('recentlyViewedUpdated'));
@@ -113,13 +114,17 @@ const Home = () => {
           onClose={() => setIsOrderModalOpen(false)} 
           onOpenSampleForm={() => {
             setIsOrderModalOpen(false);
+            setSampleProduct(null);
             setIsSampleFormOpen(true);
           }} 
         />
       )}
 
       {isSampleFormOpen && (
-        <SampleFormModal onClose={() => setIsSampleFormOpen(false)} />
+        <SampleFormModal 
+          onClose={() => setIsSampleFormOpen(false)} 
+          initialProduct={sampleProduct}
+        />
       )}
 
       {selectedProduct && (
@@ -128,6 +133,7 @@ const Home = () => {
           onClose={() => setSelectedProduct(null)} 
           onOpenLightbox={(img) => setLightboxImg(img)}
           onOpenSampleForm={() => {
+            setSampleProduct(selectedProduct);
             setSelectedProduct(null);
             setIsSampleFormOpen(true);
           }}

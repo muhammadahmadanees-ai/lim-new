@@ -21,6 +21,7 @@ const ProductsView = ({ collectionData, onBack, onOpenProduct }) => {
           }
           prods.push({
             id: rawData.id,
+            collection: collectionData.name,
             name: data.name || data.title || 'Unnamed',
             desc: data.description || data.desc || data.detail || '',
             img: data.imageurl || data.imgurl || data.image || data.img || data.pic || '',

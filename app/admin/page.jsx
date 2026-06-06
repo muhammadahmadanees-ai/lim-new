@@ -261,20 +261,20 @@ const Admin = () => {
   };
 
   // --- Sortable Handlers ---
-  const onCollectionsSortEnd = async (newList) => {
-    setCollectionsList(newList);
-    const updates = newList.map((col, index) => ({ id: col.id, order: index }));
-    for (const update of updates) {
+  const onCollectionsSortEnd = (newList) => {
+    const updatedList = newList.map((col, index) => ({ ...col, order: index }));
+    setCollectionsList(updatedList);
+    updatedList.forEach(async (update) => {
       await supabase.from('collections').update({ order: update.order }).eq('id', update.id);
-    }
+    });
   };
 
-  const onProductsSortEnd = async (newList) => {
-    setProductsList(newList);
-    const updates = newList.map((prod, index) => ({ id: prod.id, order: index }));
-    for (const update of updates) {
+  const onProductsSortEnd = (newList) => {
+    const updatedList = newList.map((prod, index) => ({ ...prod, order: index }));
+    setProductsList(updatedList);
+    updatedList.forEach(async (update) => {
       await supabase.from('products').update({ order: update.order }).eq('id', update.id);
-    }
+    });
   };
 
   // --- Orders Logic ---
