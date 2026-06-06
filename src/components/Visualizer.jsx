@@ -19,7 +19,7 @@ const Visualizer = () => {
         const { data: fetchedTiles, error } = await supabase.from("products").select('id, name, img').not('img', 'is', null).order('order');
         if (error) throw error;
         // Some products might have empty string or just the word 'null'
-        const validTiles = (fetchedTiles || []).filter(t => t.img && t.img.length > 5);
+        const validTiles = (fetchedTiles || []).filter(t => t.img && t.img.trim() !== '' && t.img !== 'null');
         setTiles(validTiles);
       } catch (e) {
         console.error("Error fetching visualizer tiles", e);
