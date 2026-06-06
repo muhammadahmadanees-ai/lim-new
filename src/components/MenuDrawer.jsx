@@ -1,3 +1,4 @@
+"use client";
 import React, { useEffect, useState, useRef } from 'react';
 import { supabase } from '../supabase';
 import RecentlyViewed from './RecentlyViewed';

@@ -1,3 +1,4 @@
+"use client";
 import React from 'react';
 
 const About = () => {
@@ -10,7 +11,7 @@ const About = () => {
             At LIM Factory, we believe in the harmony of natural materials and modern design. Our exclusive
             high-performance mineral binder ensures our slabs are exceptionally strong, durable, and uniquely beautiful.
           </p>
-          <p>We craft every piece with precision, offering bespoke solutions for floors, walls, and custom furnishings.</p>
+          <p>We craft every piece with precision, offering custom solutions for floors, walls, and furnishings.</p>
 
           <div className="about-stats">
             <a href={`https://wa.me/923164934687?text=${encodeURIComponent("Hello LIM Factory! 👋 I visited your website and I'm interested in placing an order. Could you please help me with your terrazzo tile collections, pricing, and availability? Thank you!")}`} target="_blank" rel="noreferrer" className="social-icon whatsapp">
