@@ -85,7 +85,6 @@ const ProductsView = ({ collectionData, onBack, onOpenProduct }) => {
                     {prod.name}
                     {prod.refcode && <span className="ref-code" style={{ marginLeft: 'auto' }}>{prod.refcode}</span>}
                   </h3>
-                  {prod.price && <p style={{ color: 'var(--accent-color)', fontWeight: 'bold', marginBottom: '0' }}>{prod.price}</p>}
                   <p className="card-desc" style={{ marginTop: '0.5rem' }}>{prod.desc}</p>
                   <a href="#" className="link view-details-btn" onClick={(e) => { e.preventDefault(); onOpenProduct(prod); }}>
                     View Details <span className="arrow-icon">&rarr;</span>

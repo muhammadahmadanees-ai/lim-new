@@ -5,7 +5,6 @@ import Navbar from '../src/components/Navbar';
 import Hero from '../src/components/Hero';
 import Collections from '../src/components/Collections';
 import ProductsView from '../src/components/ProductsView';
-import About from '../src/components/About';
 import Contact from '../src/components/Contact';
 import Visualizer from '../src/components/Visualizer';
 import FAQ from '../src/components/FAQ';
@@ -123,7 +122,6 @@ const Home = () => {
         />
       )}
       
-      <About />
       <Visualizer />
       <FAQ />
       <Contact />

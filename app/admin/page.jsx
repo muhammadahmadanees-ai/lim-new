@@ -827,8 +827,55 @@ const Admin = () => {
                 <input type="text" value={prodFormData.name} onChange={e => setProdFormData({...prodFormData, name: e.target.value})} required style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '6px' }} />
               </div>
               <div className="form-group" style={{ marginBottom: '1rem' }}>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>Price</label>
-                <input type="text" placeholder="e.g. £120.00 / sqm" value={prodFormData.price} onChange={e => setProdFormData({...prodFormData, price: e.target.value})} style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '6px' }} />
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>Base Price (Fallback)</label>
+                <input 
+                  type="text" 
+                  placeholder="e.g. 700 PKr/sqm" 
+                  value={(function(){
+                    if (!prodFormData.price) return '';
+                    try { const p = JSON.parse(prodFormData.price); return p.base !== undefined ? p.base : ''; } 
+                    catch(e) { return prodFormData.price; }
+                  })()} 
+                  onChange={e => {
+                    const val = e.target.value;
+                    let p = {};
+                    if (prodFormData.price) {
+                      try { p = JSON.parse(prodFormData.price); } 
+                      catch(err) { p = { base: prodFormData.price }; }
+                    }
+                    p.base = val;
+                    setProdFormData({...prodFormData, price: JSON.stringify(p)});
+                  }} 
+                  style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '6px', marginBottom: '10px' }} 
+                />
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500', fontSize: '0.9rem', color: '#555' }}>Override Price per Size (Optional)</label>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                  {['30x30', '30x60', '45x45', '60x60', '60x120'].map(size => (
+                    <div key={size}>
+                      <span style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '4px' }}>{size}</span>
+                      <input 
+                        type="text" 
+                        placeholder={`Custom price`}
+                        value={(function(){
+                          if (!prodFormData.price) return '';
+                          try { const p = JSON.parse(prodFormData.price); return p[size] || ''; } 
+                          catch(e) { return ''; }
+                        })()} 
+                        onChange={e => {
+                          const val = e.target.value;
+                          let p = {};
+                          if (prodFormData.price) {
+                            try { p = JSON.parse(prodFormData.price); } 
+                            catch(err) { p = { base: prodFormData.price }; }
+                          }
+                          if (val) p[size] = val; else delete p[size];
+                          setProdFormData({...prodFormData, price: JSON.stringify(p)});
+                        }} 
+                        style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '6px', fontSize: '0.85rem' }} 
+                      />
+                    </div>
+                  ))}
+                </div>
               </div>
               <div className="form-group" style={{ marginBottom: '1rem' }}>
                 <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>Description</label>

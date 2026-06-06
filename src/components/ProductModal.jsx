@@ -15,6 +15,44 @@ const ProductModal = ({ product, onClose, onOpenLightbox, onOpenSampleForm }) =>
 
   if (!product) return null;
 
+  const getDisplayPrice = () => {
+    if (!product.price) return null;
+    if (!selectedSize) return null;
+
+    let baseStr = product.price;
+    try {
+      const parsed = JSON.parse(product.price);
+      if (parsed[selectedSize]) return parsed[selectedSize];
+      if (parsed['base']) {
+        baseStr = parsed['base'];
+      } else {
+        return "Price on Request";
+      }
+    } catch (e) {}
+
+    const baseMatch = baseStr.match(/[\d,.]+/);
+    if (baseMatch) {
+      const basePrice = parseFloat(baseMatch[0].replace(/,/g, ''));
+      let areaSqm = 0.09;
+      if (selectedSize === '30x30') areaSqm = 0.09;
+      else if (selectedSize === '30x60') areaSqm = 0.18;
+      else if (selectedSize === '45x45') areaSqm = 0.2025;
+      else if (selectedSize === '60x60') areaSqm = 0.36;
+      else if (selectedSize === '60x120') areaSqm = 0.72;
+      
+      const isPerSqm = baseStr.toLowerCase().includes('sqm');
+      if (isPerSqm) {
+         const pricePerTile = Math.round(basePrice * areaSqm);
+         return `${pricePerTile} PKR / tile`;
+      } else {
+         const multiplier = areaSqm / 0.09;
+         const newPrice = Math.round(basePrice * multiplier);
+         return baseStr.replace(baseMatch[0], newPrice);
+      }
+    }
+    return baseStr;
+  };
+
   return (
     <div className="pm-overlay" onClick={(e) => { if (e.target.classList.contains('pm-overlay')) onClose(); }}>
       <div className="pm-container">
@@ -41,7 +79,8 @@ const ProductModal = ({ product, onClose, onOpenLightbox, onOpenSampleForm }) =>
             <span className="pm-close" onClick={onClose}>&times;</span>
           </div>
           
-          {product.price && <div className="pm-price">{product.price}</div>}
+          {/* Price hidden for now per request */}
+          {/* {product.price && <div className="pm-price">{getDisplayPrice()}</div>} */}
           
           <div className="pm-desc">{product.desc}</div>
           

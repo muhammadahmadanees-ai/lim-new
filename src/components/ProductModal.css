@@ -164,8 +164,8 @@
 }
 
 .pm-size-item.selected .pm-size-box {
-    border: 2px solid #B83A2A;
-    background: #fffafa;
+    border: 2px solid #000000;
+    background: #000000;
 }
 
 .pm-size-label {

@@ -42,10 +42,9 @@ const Navbar = ({ onOrderSamples, onToggleDrawer, onOpenSearch }) => {
           </span>
         </a>
         <nav>
-          <ul className="nav-links">
+          <ul className="nav-links pc-only-flex">
             <li><a href="#" id="nav-home-btn">Home</a></li>
             <li><a href="#collections">Collections</a></li>
-            <li><a href="#about">About</a></li>
             <li><a href="#visualizer">Visualizer</a></li>
             <li><a href="#faq">FAQ</a></li>
             <li><a href="#contact">Contact</a></li>

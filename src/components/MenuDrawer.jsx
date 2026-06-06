@@ -300,11 +300,7 @@ const MenuDrawer = ({ isOpen, onClose, onSelectCollection, onOpenProduct }) => {
                   <i className="fas fa-cubes section-link-icon"></i> Collections
                 </a>
               </li>
-              <li>
-                <a href="#about" onClick={() => onClose()}>
-                  <i className="fas fa-info-circle section-link-icon"></i> About
-                </a>
-              </li>
+
               <li>
                 <a href="#visualizer" onClick={() => onClose()}>
                   <i className="fas fa-palette section-link-icon"></i> Room Visualizer
