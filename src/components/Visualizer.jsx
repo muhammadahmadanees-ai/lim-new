@@ -303,7 +303,11 @@ const Visualizer = () => {
                     key={tile.id} 
                     className="viz-tile-btn" 
                     title={tile.name} 
-                    style={{ backgroundImage: `url('${tile.img}')` }} 
+                    style={{ 
+                      backgroundImage: `url('${tile.img}')`, 
+                      backgroundColor: '#f5f5f5', 
+                      border: '1px solid #e0e0e0' 
+                    }} 
                     onClick={() => window.visualizerSelectTile(tile.img)}
                   ></div>
                 ))}
