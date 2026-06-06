@@ -2177,3 +2177,47 @@ video::-webkit-media-controls-start-playback-button {
 video::-webkit-media-controls {
   display: none !important;
 }
+
+.mobile-only-btn {
+  display: none !important;
+}
+
+@media (max-width: 768px) {
+  .mobile-only-btn {
+    display: flex !important;
+  }
+  .mobile-nav-layout {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    position: relative;
+  }
+  .nav-mobile-left {
+    flex: 1;
+    display: flex !important;
+    justify-content: flex-start !important;
+    margin: 0 !important;
+  }
+  .nav-mobile-center {
+    flex: 2;
+    display: flex !important;
+    justify-content: center !important;
+    margin: 0 !important;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  .nav-mobile-center:hover {
+    transform: translateX(-50%) scale(1.05);
+  }
+  .nav-mobile-right {
+    flex: 1;
+    display: flex !important;
+    justify-content: flex-end !important;
+    margin: 0 !important;
+    gap: 15px;
+  }
+  .desktop-only-btn {
+    display: none !important;
+  }
+}

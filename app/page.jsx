@@ -17,6 +17,7 @@ import ProductModal from '../src/components/ProductModal';
 import OrderModal from '../src/components/OrderModal';
 import SampleFormModal from '../src/components/SampleFormModal';
 import Lightbox from '../src/components/Lightbox';
+import SearchModal from '../src/components/SearchModal';
 
 const Home = () => {
   const [selectedCollection, setSelectedCollection] = useState(null);
@@ -28,6 +29,7 @@ const Home = () => {
   const [sampleProduct, setSampleProduct] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [lightboxImg, setLightboxImg] = useState(null);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   const handleOpenProduct = async (prod) => {
     let fullProd = prod;
@@ -94,9 +96,11 @@ const Home = () => {
 
   return (
     <div className="home-page">
+      <main>
       <Navbar 
         onOrderSamples={() => setIsOrderModalOpen(true)} 
         onToggleDrawer={() => setIsDrawerOpen(true)}
+        onOpenSearch={() => setIsSearchOpen(true)}
       />
       
       <MenuDrawer 
@@ -144,6 +148,13 @@ const Home = () => {
         />
       )}
 
+      {isSearchOpen && (
+        <SearchModal 
+          onClose={() => setIsSearchOpen(false)}
+          onOpenProduct={handleOpenProduct}
+        />
+      )}
+
       {selectedProduct && (
         <ProductModal 
           product={selectedProduct} 
@@ -160,6 +171,7 @@ const Home = () => {
       {lightboxImg && (
         <Lightbox img={lightboxImg} onClose={() => setLightboxImg(null)} />
       )}
+      </main>
     </div>
   );
 };

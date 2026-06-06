@@ -1,13 +1,13 @@
 "use client";
 import React from 'react';
 
-const Navbar = ({ onOrderSamples, onToggleDrawer }) => {
+const Navbar = ({ onOrderSamples, onToggleDrawer, onOpenSearch }) => {
   return (
     <header id="navbar">
-      <div className="container nav-container">
+      <div className="container nav-container mobile-nav-layout">
         <button 
           id="nav-menu-toggle-btn" 
-          className="menu-toggle-btn" 
+          className="menu-toggle-btn nav-mobile-left" 
           onClick={onToggleDrawer} 
           aria-label="Toggle Menu"
           style={{
@@ -17,7 +17,6 @@ const Navbar = ({ onOrderSamples, onToggleDrawer }) => {
             cursor: 'pointer',
             marginRight: '15px',
             color: 'var(--text-color)',
-            display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             padding: '4px',
@@ -26,7 +25,7 @@ const Navbar = ({ onOrderSamples, onToggleDrawer }) => {
         >
           <i className="fas fa-bars"></i>
         </button>
-        <a href="#" className="logo">
+        <a href="#" className="logo nav-mobile-center">
           <img
             src="https://kagimdnkyqfduhcbkceo.supabase.co/storage/v1/object/public/images/lim_transparent_logo.png"
             alt="LIM Factory Logo"
@@ -52,8 +51,11 @@ const Navbar = ({ onOrderSamples, onToggleDrawer }) => {
             <li><a href="#contact">Contact</a></li>
           </ul>
         </nav>
-        <div className="nav-actions">
-          <button className="btn btn-outline" id="order-samples-btn" onClick={onOrderSamples}>
+        <div className="nav-actions nav-mobile-right">
+          <button className="search-icon-btn mobile-only-btn" onClick={onOpenSearch} aria-label="Search" style={{ background: 'none', border: 'none', fontSize: '1.4rem', cursor: 'pointer', color: 'var(--text-color)', alignItems: 'center', justifyContent: 'center' }}>
+            <i className="fas fa-search"></i>
+          </button>
+          <button className="btn btn-outline desktop-only-btn" id="order-samples-btn" onClick={onOrderSamples}>
             Order Samples
           </button>
         </div>
