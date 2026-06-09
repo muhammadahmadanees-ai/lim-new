@@ -1,38 +1,54 @@
 "use client";
 import React, { useEffect, useState } from 'react';
-import { supabase } from '../supabase';
+import { supabase, fetchProductsCached, getProductsCache } from '../supabase';
 
 const ProductsView = ({ collectionData, onBack, onOpenProduct }) => {
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const processProducts = (rawProducts) => {
+    const prods = [];
+    rawProducts.forEach((rawData) => {
+      const data = {};
+      for (let key in rawData) {
+          const cleanKey = key.toLowerCase().replace(/[\s_]+/g, '');
+          data[cleanKey] = rawData[key];
+      }
+      prods.push({
+        id: rawData.id,
+        collection: collectionData.name,
+        name: data.name || data.title || 'Unnamed',
+        desc: data.description || data.desc || data.detail || '',
+        img: data.imageurl || data.imgurl || data.image || data.img || data.pic || '',
+        sizesImg: data.sizesimageurl || data.sizeimage || data.sizesimage || data.sizepic || '',
+        sizes: data.sizes || data.size || '',
+        refcode: data.refcode || data.referencecode || data.code || data.refercode || '',
+        price: data.price || data.cost || ''
+      });
+    });
+    return prods;
+  };
+
+  const cachedSnapshot = collectionData ? getProductsCache(collectionData.id) : null;
+  const initialProducts = cachedSnapshot ? processProducts(cachedSnapshot) : [];
+
+  const [products, setProducts] = useState(initialProducts);
+  const [loading, setLoading] = useState(!cachedSnapshot);
 
   useEffect(() => {
     window.scrollTo(0, 0);
+    if (!collectionData) return;
+    
+    // Check if we already have cache for this specific collection to avoid loading state flicker when collectionData changes
+    const currentCache = getProductsCache(collectionData.id);
+    if (currentCache) {
+      setProducts(processProducts(currentCache));
+      setLoading(false);
+      return;
+    }
+
     const fetchProducts = async () => {
-      if (!collectionData) return;
+      setLoading(true);
       try {
-        const { data: rawProducts, error } = await supabase.from('products').select('*').eq('collection_id', collectionData.id).order('order');
-        if (error) throw error;
-        const prods = [];
-        rawProducts.forEach((rawData) => {
-          const data = {};
-          for (let key in rawData) {
-              const cleanKey = key.toLowerCase().replace(/[\s_]+/g, '');
-              data[cleanKey] = rawData[key];
-          }
-          prods.push({
-            id: rawData.id,
-            collection: collectionData.name,
-            name: data.name || data.title || 'Unnamed',
-            desc: data.description || data.desc || data.detail || '',
-            img: data.imageurl || data.imgurl || data.image || data.img || data.pic || '',
-            sizesImg: data.sizesimageurl || data.sizeimage || data.sizesimage || data.sizepic || '',
-            sizes: data.sizes || data.size || '',
-            refcode: data.refcode || data.referencecode || data.code || data.refercode || '',
-            price: data.price || data.cost || ''
-          });
-        });
-        setProducts(prods);
+        const rawProducts = await fetchProductsCached(collectionData.id);
+        setProducts(processProducts(rawProducts));
       } catch (err) {
         console.error("Error fetching products", err);
       } finally {

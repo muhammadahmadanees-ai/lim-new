@@ -109,18 +109,18 @@ const Home = () => {
         onOpenProduct={handleOpenProduct}
       />
       
-      {!selectedCollection ? (
-        <>
-          <Hero />
-          <Collections onSelectCollection={setSelectedCollection} onOpenProduct={handleOpenProduct} />
-        </>
-      ) : (
+      <div style={{ display: !selectedCollection ? 'block' : 'none' }}>
+        <Hero />
+        <Collections onSelectCollection={setSelectedCollection} onOpenProduct={handleOpenProduct} />
+      </div>
+      
+      <div style={{ display: selectedCollection ? 'block' : 'none' }}>
         <ProductsView 
           collectionData={selectedCollection} 
           onBack={() => setSelectedCollection(null)} 
           onOpenProduct={handleOpenProduct}
         />
-      )}
+      </div>
       
       <Visualizer />
       <FAQ />

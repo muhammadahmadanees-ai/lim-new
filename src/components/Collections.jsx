@@ -1,67 +1,9 @@
 "use client";
 import React, { useEffect, useState } from 'react';
-import { supabase } from '../supabase';
+import { supabase, fetchCollectionsCached, getCollectionsCache } from '../supabase';
 import RecentlyViewed from './RecentlyViewed';
 
 const Collections = ({ onSelectCollection, onOpenProduct }) => {
-  const [collections, setCollections] = useState([]);
-  const [treeRoots, setTreeRoots] = useState([]);
-  const [loading, setLoading] = useState(true);
-  
-  // Navigation states
-  const [activeNode, setActiveNode] = useState(null); // Selected category node in tree
-  const [expandedNodes, setExpandedNodes] = useState({}); // Expanded folders state { nodeId: boolean }
-
-  useEffect(() => {
-    const fetchCollections = async () => {
-      try {
-        const { data: querySnapshot, error } = await supabase.from('collections').select('*').order('order');
-        if (error) throw error;
-        const cols = [];
-        querySnapshot.forEach((rawData) => {
-          const data = {};
-          for (let key in rawData) {
-              const cleanKey = key.toLowerCase().replace(/[\s_]+/g, '');
-              data[cleanKey] = rawData[key];
-          }
-            const catName = data.name || data.title || 'Unnamed';
-            let imgUrl = data.img || data.imageurl || data.imgurl || data.image || data.pic || '';
-            cols.push({
-              id: rawData.id,
-              name: catName,
-              desc: data.description || data.desc || data.detail || '',
-              img: imgUrl,
-              parentId: data.parentid || '',
-            type: data.type || 'collection', // default to collection
-            order: data.order !== undefined ? Number(data.order) : 0
-          });
-        });
-
-        setCollections(cols);
-        const roots = buildTree(cols);
-        setTreeRoots(roots);
-        
-        // Auto-expand top level nodes
-        const initialExpanded = {};
-        roots.forEach(r => {
-          initialExpanded[r.id] = true;
-          if (r.children) {
-            r.children.forEach(c => {
-              initialExpanded[c.id] = true;
-            });
-          }
-        });
-        setExpandedNodes(initialExpanded);
-      } catch (err) {
-        console.error("Error fetching collections", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCollections();
-  }, []);
-
   // Construct hierarchy dynamically
   const buildTree = (items) => {
     const itemMap = {};
@@ -90,6 +32,75 @@ const Collections = ({ onSelectCollection, onOpenProduct }) => {
     roots.sort((a, b) => (a.order || 0) - (b.order || 0));
     return roots;
   };
+
+  const processCollectionsData = (querySnapshot) => {
+    const cols = [];
+    querySnapshot.forEach((rawData) => {
+      const data = {};
+      for (let key in rawData) {
+          const cleanKey = key.toLowerCase().replace(/[\s_]+/g, '');
+          data[cleanKey] = rawData[key];
+      }
+      const catName = data.name || data.title || 'Unnamed';
+      let imgUrl = data.img || data.imageurl || data.imgurl || data.image || data.pic || '';
+      cols.push({
+        id: rawData.id,
+        name: catName,
+        desc: data.description || data.desc || data.detail || '',
+        img: imgUrl,
+        parentId: data.parentid || '',
+        type: data.type || 'collection', // default to collection
+        order: data.order !== undefined ? Number(data.order) : 0
+      });
+    });
+
+    const roots = buildTree(cols);
+    const initialExpanded = {};
+    roots.forEach(r => {
+      initialExpanded[r.id] = true;
+      if (r.children) {
+        r.children.forEach(c => {
+          initialExpanded[c.id] = true;
+        });
+      }
+    });
+    return { cols, roots, initialExpanded };
+  };
+
+  // Sync initialization to avoid flicker
+  const cachedSnapshot = getCollectionsCache();
+  const initialData = cachedSnapshot ? processCollectionsData(cachedSnapshot) : null;
+
+  const [collections, setCollections] = useState(initialData ? initialData.cols : []);
+  const [treeRoots, setTreeRoots] = useState(initialData ? initialData.roots : []);
+  const [loading, setLoading] = useState(!cachedSnapshot);
+  
+  // Navigation states
+  const [activeNode, setActiveNode] = useState(null); // Selected category node in tree
+  const [expandedNodes, setExpandedNodes] = useState(initialData ? initialData.initialExpanded : {});
+
+  useEffect(() => {
+    if (cachedSnapshot) return; // Skip if loaded from cache
+
+    const fetchCollections = async () => {
+      try {
+        const querySnapshot = await fetchCollectionsCached();
+        const { cols, roots, initialExpanded } = processCollectionsData(querySnapshot);
+
+        setCollections(cols);
+        setTreeRoots(roots);
+        setExpandedNodes(initialExpanded);
+      } catch (err) {
+        console.error("Error fetching collections", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCollections();
+  }, [cachedSnapshot]);
+
+
 
   // Toggle tree node expansion
   const toggleExpand = (nodeId, e) => {
