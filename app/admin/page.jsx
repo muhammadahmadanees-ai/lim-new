@@ -850,7 +850,7 @@ const Admin = () => {
                 />
                 <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500', fontSize: '0.9rem', color: '#555' }}>Override Price per Size (Optional)</label>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                  {['30x30', '30x60', '45x45', '60x60', '60x120'].map(size => (
+                  {(prodFormData.sizes ? prodFormData.sizes.split(',').map(s => s.trim()).filter(Boolean) : []).map(size => (
                     <div key={size}>
                       <span style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '4px' }}>{size}</span>
                       <input 
@@ -875,6 +875,11 @@ const Admin = () => {
                       />
                     </div>
                   ))}
+                  {(!prodFormData.sizes || prodFormData.sizes.trim() === '') && (
+                    <div style={{ gridColumn: '1 / -1', fontSize: '0.85rem', color: '#888' }}>
+                      Please enter available sizes below first to set custom prices.
+                    </div>
+                  )}
                 </div>
               </div>
               <div className="form-group" style={{ marginBottom: '1rem' }}>

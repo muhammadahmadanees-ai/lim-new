@@ -68,7 +68,7 @@ const ProductsView = ({ collectionData, onBack, onOpenProduct }) => {
           <button id="back-to-collections" className="btn btn-outline" style={{ marginBottom: 'var(--spacing-md)' }} onClick={onBack}>
             &larr; Back to Collections
           </button>
-          <h2 id="products-view-title">{collectionData.name}</h2>
+          <h2 id="products-view-title" style={{ fontWeight: 'bold' }}>{collectionData.name}</h2>
           <p>Select a product to view detailed specifications.</p>
         </div>
 
@@ -97,9 +97,9 @@ const ProductsView = ({ collectionData, onBack, onOpenProduct }) => {
                   {!prod.img && <span>Product Image</span>}
                 </div>
                 <div className="card-content">
-                  <h3 style={{ display: 'flex', alignItems: 'baseline', flexWrap: 'wrap', gap: '0.5rem' }}>
+                  <h3 style={{ display: 'flex', alignItems: 'baseline', flexWrap: 'wrap', gap: '0.5rem', fontWeight: 'bold' }}>
                     {prod.name}
-                    {prod.refcode && <span className="ref-code" style={{ marginLeft: 'auto' }}>{prod.refcode}</span>}
+                    {prod.refcode && <span className="ref-code" style={{ marginLeft: 'auto', fontWeight: 'normal' }}>{prod.refcode}</span>}
                   </h3>
                   <p className="card-desc" style={{ marginTop: '0.5rem' }}>{prod.desc}</p>
                   <a href="#" className="link view-details-btn" onClick={(e) => { e.preventDefault(); onOpenProduct(prod); }}>

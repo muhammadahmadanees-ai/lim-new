@@ -165,7 +165,7 @@ const Collections = ({ onSelectCollection, onOpenProduct }) => {
                   <span className="tree-indent-dot"><i className="far fa-circle"></i></span>
                 )}
                 <i className={`fas ${isCategory ? (isExpanded ? 'fa-folder-open' : 'fa-folder') : 'fa-layer-group'} node-icon`}></i>
-                <span className="node-name">{node.name}</span>
+                <span className="node-name" style={{ fontWeight: 'bold' }}>{node.name}</span>
               </div>
               
               {isCategory && isExpanded && hasChildren && (
@@ -205,7 +205,7 @@ const Collections = ({ onSelectCollection, onOpenProduct }) => {
                   onClick={() => selectNode(null)}
                 >
                   <i className="fas fa-database node-icon"></i>
-                  <span className="node-name" style={{ fontWeight: '500' }}>All Collections</span>
+                  <span className="node-name" style={{ fontWeight: 'bold' }}>All Collections</span>
                 </div>
                 {renderTreeNodes(treeRoots)}
               </div>
@@ -234,7 +234,7 @@ const Collections = ({ onSelectCollection, onOpenProduct }) => {
 
               {/* Title & Description of Current Category */}
               <div className="category-info-panel">
-                <h3>{activeNode ? activeNode.name : 'Collections Home'}</h3>
+                <h3 style={{ fontWeight: 'bold' }}>{activeNode ? activeNode.name : 'Collections Home'}</h3>
                 <p>{activeNode ? activeNode.desc : 'Browse our premium terrazzo products organized by pressing techniques and layouts.'}</p>
               </div>
 
@@ -275,7 +275,7 @@ const Collections = ({ onSelectCollection, onOpenProduct }) => {
                               {isCategory ? 'Category' : 'Collection'}
                             </span>
                           </div>
-                          <h3>{item.name}</h3>
+                          <h3 style={{ fontWeight: 'bold' }}>{item.name}</h3>
                           <p className="card-desc">{item.desc}</p>
                           <a href="#" className="link view-products-btn" onClick={(e) => { e.preventDefault(); e.stopPropagation(); selectNode(item); }}>
                             {isCategory ? 'Open Folder' : 'View Products'} <span className="arrow-icon">&rarr;</span>
