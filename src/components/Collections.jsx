@@ -155,11 +155,17 @@ const Collections = ({ onSelectCollection, onOpenProduct }) => {
             <li key={node.id} className={`tree-node ${isActive ? 'active' : ''}`}>
               <div 
                 className="tree-node-header" 
-                onClick={() => selectNode(node)}
+                style={{ cursor: 'pointer' }}
+                onClick={(e) => {
+                  if (isCategory) {
+                    toggleExpand(node.id, e);
+                  }
+                  selectNode(node);
+                }}
               >
                 {isCategory ? (
-                  <span className="tree-toggle" onClick={(e) => toggleExpand(node.id, e)}>
-                    <i className={`fas ${isExpanded ? 'fa-chevron-down' : 'fa-chevron-right'} toggle-icon`}></i>
+                  <span className="tree-toggle" onClick={(e) => { e.stopPropagation(); toggleExpand(node.id, e); }}>
+                    <i className={`fas ${isExpanded ? 'fa-minus' : 'fa-plus'} toggle-icon`}></i>
                   </span>
                 ) : (
                   <span className="tree-indent-dot"><i className="far fa-circle"></i></span>
@@ -168,9 +174,13 @@ const Collections = ({ onSelectCollection, onOpenProduct }) => {
                 <span className="node-name" style={{ fontWeight: 'bold' }}>{node.name}</span>
               </div>
               
-              {isCategory && isExpanded && hasChildren && (
-                <div className="tree-subnodes">
-                  {renderTreeNodes(node.children)}
+              {isCategory && hasChildren && (
+                <div className={`tree-subnodes-wrapper ${isExpanded ? 'expanded' : ''}`}>
+                  <div className="tree-subnodes-inner">
+                    <div className="tree-subnodes">
+                      {renderTreeNodes(node.children)}
+                    </div>
+                  </div>
                 </div>
               )}
             </li>

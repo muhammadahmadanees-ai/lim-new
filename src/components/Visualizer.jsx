@@ -12,6 +12,8 @@ const Visualizer = () => {
 
   const [tiles, setTiles] = useState([]);
   const [selectedTile, setSelectedTile] = useState(null);
+  const [isTileLoading, setIsTileLoading] = useState(false);
+  const [loadedImagesCount, setLoadedImagesCount] = useState(0);
 
   useEffect(() => {
     const fetchTiles = async () => {
@@ -40,8 +42,9 @@ const Visualizer = () => {
     let tileScale = 15;
     let pts = [];
     let dragging = null;
+    let pendingRender = false;
     const HANDLE_R = 11;
-    const SUBDIV = 28;
+    const SUBDIV = 14;
 
     const fileInput = fileInputRef.current;
     const uploadArea = uploadAreaRef.current;
@@ -49,6 +52,12 @@ const Visualizer = () => {
 
     const handleFile = (file) => {
         if (!file || !file.type.startsWith('image/')) return;
+        
+        if (uploadArea) {
+            uploadArea.innerHTML = '<i class="fas fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 1rem; color: #b83a2a;"></i><p>Loading image...</p>';
+            uploadArea.style.pointerEvents = 'none';
+        }
+
         const reader = new FileReader();
         reader.onload = ev => {
             const img = new Image();
@@ -100,12 +109,20 @@ const Visualizer = () => {
         const ts = Math.max(10, tileScale * 8);
         const need = Math.max(canvas.width, canvas.height, 400);
         const sz = Math.ceil(need / ts) * ts;
+        
+        const tileThumb = document.createElement('canvas');
+        tileThumb.width = ts; tileThumb.height = ts;
+        const thumbCtx = tileThumb.getContext('2d');
+        thumbCtx.drawImage(tileImg, 0, 0, ts, ts);
+
         const oc = document.createElement('canvas');
         oc.width = sz; oc.height = sz;
         const octx = oc.getContext('2d');
-        for (let ty = 0; ty < sz; ty += ts)
-            for (let tx = 0; tx < sz; tx += ts)
-                octx.drawImage(tileImg, tx, ty, ts, ts);
+        
+        const pattern = octx.createPattern(tileThumb, 'repeat');
+        octx.fillStyle = pattern;
+        octx.fillRect(0, 0, sz, sz);
+        
         offscreen = oc;
     }
 
@@ -146,10 +163,12 @@ const Visualizer = () => {
         ctx.closePath();
         ctx.clip();
 
-        for (let row = 0; row < SUBDIV; row++) {
-            for (let col = 0; col < SUBDIV; col++) {
-                const u0 = col / SUBDIV, u1 = (col + 1) / SUBDIV;
-                const v0 = row / SUBDIV, v1 = (row + 1) / SUBDIV;
+        const dynSubdiv = (dragging !== null) ? 4 : 20;
+
+        for (let row = 0; row < dynSubdiv; row++) {
+            for (let col = 0; col < dynSubdiv; col++) {
+                const u0 = col / dynSubdiv, u1 = (col + 1) / dynSubdiv;
+                const v0 = row / dynSubdiv, v1 = (row + 1) / dynSubdiv;
 
                 const p00 = shapePoint(u0, v0), p10 = shapePoint(u1, v0);
                 const p11 = shapePoint(u1, v1), p01 = shapePoint(u0, v1);
@@ -235,10 +254,16 @@ const Visualizer = () => {
         const pos = getEventPos(e);
         pts[dragging].x = Math.max(0, Math.min(canvas.width, pos.x));
         pts[dragging].y = Math.max(0, Math.min(canvas.height, pos.y));
-        render();
+        if (!pendingRender) {
+            pendingRender = true;
+            requestAnimationFrame(() => {
+                render();
+                pendingRender = false;
+            });
+        }
     };
 
-    const onUp = () => dragging = null;
+    const onUp = () => { dragging = null; };
 
     canvas.addEventListener('mousedown', onDown);
     canvas.addEventListener('mousemove', onMove);
@@ -247,27 +272,36 @@ const Visualizer = () => {
     canvas.addEventListener('touchmove', onMove, {passive:false});
     window.addEventListener('touchend', onUp);
 
-    window.visualizerSelectTile = (url) => {
+    window.visualizerSelectTile = (url, setLoading) => {
+      if (setLoading) setLoading(true);
       const img = new Image();
       img.onload = () => {
           tileImg = img;
           buildOffscreen();
           render();
+          if (setLoading) setLoading(false);
       };
+      img.onerror = () => { if (setLoading) setLoading(false); };
       img.src = url;
     };
 
     window.visualizerSetOpacity = (val) => {
       tileOpacity = val / 100;
       if(opacityValRef.current) opacityValRef.current.textContent = val + '%';
-      render();
+      if (!pendingRender) {
+          pendingRender = true;
+          requestAnimationFrame(() => { render(); pendingRender = false; });
+      }
     };
 
     window.visualizerSetScale = (val) => {
       tileScale = parseInt(val);
       if(scaleValRef.current) scaleValRef.current.textContent = (val / 15).toFixed(1) + 'x';
       buildOffscreen();
-      render();
+      if (!pendingRender) {
+          pendingRender = true;
+          requestAnimationFrame(() => { render(); pendingRender = false; });
+      }
     };
 
     return () => {
@@ -291,9 +325,24 @@ const Visualizer = () => {
             <input type="file" id="room-photo-input" accept="image/*" style={{ display: 'none' }} ref={fileInputRef} />
           </div>
           <div className="visualizer-workspace" id="visualizer-workspace" ref={workspaceRef} style={{ display: 'none' }}>
-            <div className="visualizer-canvas-wrap">
+            <div className="visualizer-canvas-wrap" style={{ position: 'relative' }}>
+              {isTileLoading && (
+                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(255,255,255,0.7)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 10 }}>
+                  <i className="fas fa-spinner fa-spin" style={{ fontSize: '2rem', color: 'var(--accent-color)', marginBottom: '0.5rem' }}></i>
+                  <span style={{ fontWeight: 'bold' }}>Applying Tile...</span>
+                </div>
+              )}
               <canvas id="viz-canvas" ref={canvasRef}></canvas>
-              <div className="viz-hint">Drag yellow corners + blue side handles to fit your floor</div>
+              <div className="viz-hint">
+                {tiles.length > 0 && loadedImagesCount < tiles.length ? (
+                  <span style={{ color: '#c8a96e', fontWeight: 'bold' }}>
+                    <i className="fas fa-spinner fa-spin" style={{marginRight: '8px'}}></i>
+                    Loading textures for optimal performance... ({Math.min(loadedImagesCount, tiles.length)}/{tiles.length})
+                  </span>
+                ) : (
+                  <span>Drag yellow corners + blue side handles to fit your floor</span>
+                )}
+              </div>
             </div>
             <div className="visualizer-controls">
               <h3>Choose a Tile</h3>
@@ -306,10 +355,24 @@ const Visualizer = () => {
                     style={{ 
                       backgroundImage: `url('${tile.img}')`, 
                       backgroundColor: '#f5f5f5', 
-                      border: '1px solid #e0e0e0' 
+                      border: selectedTile === tile.id ? '2px solid var(--accent-color)' : '1px solid #e0e0e0',
+                      boxShadow: selectedTile === tile.id ? '0 0 0 2px white inset' : 'none',
+                      opacity: isTileLoading && selectedTile !== tile.id ? 0.5 : 1
                     }} 
-                    onClick={() => window.visualizerSelectTile(tile.img)}
-                  ></div>
+                    onClick={() => {
+                      if (isTileLoading) return;
+                      setSelectedTile(tile.id);
+                      window.visualizerSelectTile(tile.img, setIsTileLoading);
+                    }}
+                  >
+                    <img 
+                      src={tile.img} 
+                      style={{display: 'none'}} 
+                      onLoad={() => setLoadedImagesCount(prev => prev + 1)}
+                      onError={() => setLoadedImagesCount(prev => prev + 1)}
+                      alt=""
+                    />
+                  </div>
                 ))}
               </div>
               <div className="visualizer-sliders">

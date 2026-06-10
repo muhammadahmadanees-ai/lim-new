@@ -2221,3 +2221,21 @@ video::-webkit-media-controls {
     display: none !important;
   }
 }
+
+/* Smooth tree toggling animations */
+.tree-subnodes-wrapper, .drawer-tree-subnodes-wrapper {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.tree-subnodes-wrapper.expanded, .drawer-tree-subnodes-wrapper.expanded {
+    grid-template-rows: 1fr;
+}
+.tree-subnodes-inner, .drawer-tree-subnodes-inner {
+    overflow: hidden;
+}
+
+/* Ensure toggle area is clickable with pointer cursor */
+.tree-toggle, .drawer-tree-toggle {
+    cursor: pointer !important;
+}

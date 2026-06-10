@@ -187,8 +187,8 @@ const MenuDrawer = ({ isOpen, onClose, onSelectCollection, onOpenProduct }) => {
                 }}
               >
                 {isCategory ? (
-                  <span className="drawer-tree-toggle" onClick={(e) => toggleExpand(node.id, e)}>
-                    <i className={`fas ${isExpanded ? 'fa-chevron-down' : 'fa-chevron-right'} toggle-icon`}></i>
+                  <span className="drawer-tree-toggle" onClick={(e) => { e.stopPropagation(); toggleExpand(node.id, e); }}>
+                    <i className={`fas ${isExpanded ? 'fa-minus' : 'fa-plus'} toggle-icon`}></i>
                   </span>
                 ) : (
                   <span className="drawer-tree-indent-dot"><i className="far fa-circle"></i></span>
@@ -197,9 +197,13 @@ const MenuDrawer = ({ isOpen, onClose, onSelectCollection, onOpenProduct }) => {
                 <span className="node-name">{node.name}</span>
               </div>
               
-              {isCategory && isExpanded && hasChildren && (
-                <div className="drawer-tree-subnodes">
-                  {renderTreeNodes(node.children)}
+              {isCategory && hasChildren && (
+                <div className={`drawer-tree-subnodes-wrapper ${isExpanded ? 'expanded' : ''}`}>
+                  <div className="drawer-tree-subnodes-inner">
+                    <div className="drawer-tree-subnodes">
+                      {renderTreeNodes(node.children)}
+                    </div>
+                  </div>
                 </div>
               )}
             </li>
