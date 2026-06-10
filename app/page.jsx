@@ -41,7 +41,7 @@ const Home = () => {
              desc: data.description || data.desc || data.detail || '',
              img: data.imageurl || data.imgurl || data.image || data.img || data.pic || '',
              sizesImg: data.sizesimageurl || data.sizeimage || data.sizesimage || data.sizepic || '',
-             sizes: data.sizes || data.size || '',
+             sizes: data.sizes || data.size || data.availablesizes || data.available_sizes || data['available sizes'] || data['Available Sizes'] || '',
              refcode: data.refcode || data.referencecode || data.code || data.refercode || '',
              price: data.price || data.cost || ''
            };

@@ -86,16 +86,38 @@ const ProductModal = ({ product, onClose, onOpenLightbox, onOpenSampleForm }) =>
           
           <div className="pm-sizes-label">SIZES AVAILABLE</div>
           <div className="pm-sizes-row">
-            {PREDEFINED_SIZES.map(sz => (
-              <div 
-                key={sz.id} 
-                className={`pm-size-item ${selectedSize === sz.id ? 'selected' : ''}`}
-                onClick={() => setSelectedSize(sz.id)}
-              >
-                <div className="pm-size-box" style={{ width: `${sz.w}px`, height: `${sz.h}px` }}></div>
-                <div className="pm-size-label">{sz.id}</div>
-              </div>
-            ))}
+            {(() => {
+              const availableSizeIds = product.sizes ? product.sizes.split(',').map(s => s.trim()).filter(Boolean) : [];
+              const displaySizes = availableSizeIds.length > 0 
+                ? availableSizeIds.map(sizeStr => {
+                    const predefined = PREDEFINED_SIZES.find(ps => ps.id.toLowerCase() === sizeStr.toLowerCase());
+                    if (predefined) return predefined;
+                    
+                    let w = 26, h = 26; 
+                    const match = sizeStr.match(/(\d+)\s*x\s*(\d+)/i);
+                    if (match) {
+                        const widthCm = parseInt(match[1]);
+                        const heightCm = parseInt(match[2]);
+                        w = Math.round(widthCm * 0.58);
+                        h = Math.round(heightCm * 0.58);
+                        w = Math.min(Math.max(w, 15), 50);
+                        h = Math.min(Math.max(h, 15), 50);
+                    }
+                    return { id: sizeStr, w, h };
+                })
+                : PREDEFINED_SIZES;
+
+              return displaySizes.map(sz => (
+                <div 
+                  key={sz.id} 
+                  className={`pm-size-item ${selectedSize === sz.id ? 'selected' : ''}`}
+                  onClick={() => setSelectedSize(sz.id)}
+                >
+                  <div className="pm-size-box" style={{ width: `${sz.w}px`, height: `${sz.h}px` }}></div>
+                  <div className="pm-size-label">{sz.id}</div>
+                </div>
+              ));
+            })()}
           </div>
 
           <div className="pm-contact-label">For orders, contact us:</div>

@@ -32,7 +32,7 @@ const FAQ = () => {
             promises.push(supabase.from('products').select('*').eq('collection_id', col.id).then(res => {
               if (res.data) {
                 res.data.forEach(pData => {
-                  const sizes = pData.sizes || pData.size;
+                  const sizes = pData.sizes || pData.size || pData.availablesizes || pData.available_sizes || pData['available sizes'] || pData['Available Sizes'];
                   if (sizes) {
                     if (typeof sizes === 'string') {
                       sizes.split(',').forEach(s => allSizes.add(s.trim()));

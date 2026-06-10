@@ -81,7 +81,7 @@ const MenuDrawer = ({ isOpen, onClose, onSelectCollection, onOpenProduct }) => {
                 img: pData.img || pData.imageurl || pData.imgurl || pData.image || pData.pic || '',
                 price: pData.price || pData.cost || '',
                 refcode: pData.refcode || pData.referencecode || pData.code || '',
-                sizes: pData.sizes || pData.size || '',
+                sizes: pData.sizes || pData.size || pData.availablesizes || pData.available_sizes || '',
                 collectionId: col.id,
                 collectionName: col.name
               });
