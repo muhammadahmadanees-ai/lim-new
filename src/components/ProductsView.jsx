@@ -2,6 +2,37 @@
 import React, { useEffect, useState } from 'react';
 import { supabase, fetchProductsCached, getProductsCache } from '../supabase';
 
+const ShrinkText = ({ text }) => {
+  const textRef = React.useRef(null);
+  React.useEffect(() => {
+    const el = textRef.current;
+    if (!el) return;
+    
+    const resizeText = () => {
+      el.style.fontSize = ''; 
+      let currentFontSize = parseFloat(window.getComputedStyle(el).fontSize);
+      
+      while (el.scrollWidth > el.clientWidth && currentFontSize > 10) {
+        currentFontSize -= 0.5;
+        el.style.fontSize = `${currentFontSize}px`;
+      }
+    };
+
+    resizeText();
+    // Use a small timeout to ensure fonts are loaded
+    setTimeout(resizeText, 100);
+    
+    window.addEventListener('resize', resizeText);
+    return () => window.removeEventListener('resize', resizeText);
+  }, [text]);
+  
+  return (
+    <h3 ref={textRef} style={{ margin: '0', fontWeight: 'bold', width: '100%', whiteSpace: 'nowrap', overflow: 'hidden' }}>
+      {text}
+    </h3>
+  );
+};
+
 const ProductsView = ({ collectionData, onBack, onOpenProduct }) => {
   const processProducts = (rawProducts) => {
     const prods = [];
@@ -97,11 +128,11 @@ const ProductsView = ({ collectionData, onBack, onOpenProduct }) => {
                   {!prod.img && <span>Product Image</span>}
                 </div>
                 <div className="card-content">
-                  <h3 style={{ display: 'flex', alignItems: 'baseline', flexWrap: 'wrap', gap: '0.5rem', fontWeight: 'bold' }}>
-                    {prod.name}
-                    {prod.refcode && <span className="ref-code" style={{ marginLeft: 'auto', fontWeight: 'normal' }}>{prod.refcode}</span>}
-                  </h3>
-                  <p className="card-desc" style={{ marginTop: '0.5rem' }}>{prod.desc}</p>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', width: '100%', gap: '0.4rem' }}>
+                    <ShrinkText text={prod.name} />
+                    {prod.refcode && <span className="ref-code" style={{ fontWeight: 'normal' }}>{prod.refcode}</span>}
+                  </div>
+                  <p className="card-desc" style={{ marginTop: '0.4rem' }}>{prod.desc}</p>
                   <a href="#" className="link view-details-btn" onClick={(e) => { e.preventDefault(); onOpenProduct(prod); }}>
                     View Details <span className="arrow-icon">&rarr;</span>
                   </a>

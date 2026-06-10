@@ -1,6 +1,36 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './ProductModal.css';
+
+const ShrinkTextModal = ({ text }) => {
+  const textRef = useRef(null);
+  useEffect(() => {
+    const el = textRef.current;
+    if (!el) return;
+    
+    const resizeText = () => {
+      el.style.fontSize = ''; 
+      let currentFontSize = parseFloat(window.getComputedStyle(el).fontSize);
+      
+      while (el.scrollWidth > el.clientWidth && currentFontSize > 10) {
+        currentFontSize -= 0.5;
+        el.style.fontSize = `${currentFontSize}px`;
+      }
+    };
+
+    resizeText();
+    setTimeout(resizeText, 100);
+    
+    window.addEventListener('resize', resizeText);
+    return () => window.removeEventListener('resize', resizeText);
+  }, [text]);
+  
+  return (
+    <h2 ref={textRef} className="pm-title" style={{ width: '100%', whiteSpace: 'nowrap', overflow: 'hidden' }}>
+      {text}
+    </h2>
+  );
+};
 
 const PREDEFINED_SIZES = [
   { id: '30x30', w: 20, h: 20 },
@@ -73,9 +103,11 @@ const ProductModal = ({ product, onClose, onOpenLightbox, onOpenSampleForm }) =>
 
         {/* Right Column — Content Panel */}
         <div className="pm-right">
-          <div className="pm-header-row">
-            <h2 className="pm-title">{product.name}</h2>
-            {product.refcode && <span className="pm-sku">{product.refcode}</span>}
+          <div className="pm-header-row" style={{ alignItems: 'flex-start' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', width: 'calc(100% - 30px)', gap: '8px' }}>
+              <ShrinkTextModal text={product.name} />
+              {product.refcode && <span className="pm-sku" style={{ margin: 0 }}>{product.refcode}</span>}
+            </div>
             <span className="pm-close" onClick={onClose}>&times;</span>
           </div>
           
