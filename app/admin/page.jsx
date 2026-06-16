@@ -58,6 +58,9 @@ const Admin = () => {
   const [replyData, setReplyData] = useState({ orderId: '', name: '', email: '', phone: '', message: '', replyMsg: '' });
   const [replyStatus, setReplyStatus] = useState('');
 
+  const colSortTimeout = useRef(null);
+  const prodSortTimeout = useRef(null);
+
   useEffect(() => {
     emailjs.init("JeeX6f6eeMESMyxnL"); // From old-site/admin.html
 
@@ -264,17 +267,25 @@ const Admin = () => {
   const onCollectionsSortEnd = (newList) => {
     const updatedList = newList.map((col, index) => ({ ...col, order: index }));
     setCollectionsList(updatedList);
-    updatedList.forEach(async (update) => {
-      await supabase.from('collections').update({ order: update.order }).eq('id', update.id);
-    });
+    
+    if (colSortTimeout.current) clearTimeout(colSortTimeout.current);
+    colSortTimeout.current = setTimeout(async () => {
+      for (const update of updatedList) {
+        await supabase.from('collections').update({ order: update.order }).eq('id', update.id);
+      }
+    }, 1000);
   };
 
   const onProductsSortEnd = (newList) => {
     const updatedList = newList.map((prod, index) => ({ ...prod, order: index }));
     setProductsList(updatedList);
-    updatedList.forEach(async (update) => {
-      await supabase.from('products').update({ order: update.order }).eq('id', update.id);
-    });
+    
+    if (prodSortTimeout.current) clearTimeout(prodSortTimeout.current);
+    prodSortTimeout.current = setTimeout(async () => {
+      for (const update of updatedList) {
+        await supabase.from('products').update({ order: update.order }).eq('id', update.id);
+      }
+    }, 1000);
   };
 
   // --- Orders Logic ---
