@@ -58,6 +58,9 @@ const Admin = () => {
   const [replyData, setReplyData] = useState({ orderId: '', name: '', email: '', phone: '', message: '', replyMsg: '' });
   const [replyStatus, setReplyStatus] = useState('');
 
+  const colSortTimeout = useRef(null);
+  const prodSortTimeout = useRef(null);
+
   useEffect(() => {
     emailjs.init("JeeX6f6eeMESMyxnL"); // From old-site/admin.html
 
