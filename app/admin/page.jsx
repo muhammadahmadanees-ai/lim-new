@@ -674,17 +674,36 @@ const Admin = () => {
                     ghostClass="dragging"
                   >
                     {productsList.map(prod => (
-                      <div key={prod.id} className="admin-card">
-                        <div className="admin-card-img" style={{ backgroundImage: `url(${prod.img || prod.image || ''})` }}>
-                          {!(prod.img || prod.image) && 'No Image'}
+                      <div key={prod.id} className="collection-card" style={{ opacity: 1, transform: 'translateY(0)', display: 'flex', flexDirection: 'column' }}>
+                        <div
+                          className="img-placeholder"
+                          style={prod.img ? {
+                            backgroundImage: `url('${prod.img}'), linear-gradient(#ffffff, #ffffff)`,
+                            backgroundSize: 'contain, cover',
+                            backgroundRepeat: 'no-repeat',
+                            backgroundPosition: 'center',
+                            color: 'transparent',
+                            padding: '1.5rem',
+                            backgroundOrigin: 'content-box, padding-box',
+                            width: '100%'
+                          } : { width: '100%' }}
+                          title={prod.img ? 'Product Image' : ''}
+                        >
+                          {!prod.img && <span>Product Image</span>}
                         </div>
-                        <div className="admin-card-content">
-                          <h4>{prod.name}</h4>
-                          {prod.price && <p style={{ color: 'var(--primary-color)', fontWeight: 'bold', marginBottom: '5px' }}>{prod.price}</p>}
-                          <p style={{ fontSize: '0.85rem', color: '#666', marginBottom: '1rem' }}>Order: {prod.order ?? 0}</p>
-                          <div className="admin-actions">
-                            <button className="admin-btn admin-btn-edit" onClick={() => handleEditProduct(prod)}><i className="fas fa-edit"></i> Edit</button>
-                            <button className="admin-btn admin-btn-delete" onClick={() => handleDeleteProduct(prod.id)}><i className="fas fa-trash"></i></button>
+                        <div className="card-content" style={{ display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'space-between', flexGrow: 1 }}>
+                          <div>
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', width: '100%', gap: '0.4rem', marginBottom: '0.5rem' }}>
+                              <h3 style={{ margin: '0', fontWeight: 'bold', width: '100%', whiteSpace: 'nowrap', overflow: 'hidden', textTransform: 'uppercase', fontSize: '1.2rem', color: '#000' }}>{prod.name}</h3>
+                              {prod.refcode && <span className="ref-code" style={{ fontWeight: 'normal' }}>{prod.refcode}</span>}
+                            </div>
+                            <p className="card-desc" style={{ marginTop: '0.4rem', fontSize: '0.9rem', color: '#555' }}>{prod.description || prod.desc || ''}</p>
+
+                            <p style={{ fontSize: '0.8rem', color: '#666', marginTop: '5px', marginBottom: '15px' }}>Order: {prod.order ?? 0}</p>
+                          </div>
+                          <div className="admin-actions" style={{ display: 'flex', gap: '8px', width: '100%', marginTop: 'auto', borderTop: '1px solid #eee', paddingTop: '10px' }}>
+                            <button className="admin-btn admin-btn-edit" style={{ flex: 1, padding: '8px 12px' }} onClick={() => handleEditProduct(prod)}><i className="fas fa-edit"></i> Edit</button>
+                            <button className="admin-btn admin-btn-delete" style={{ width: '40px', padding: '8px 12px' }} onClick={() => handleDeleteProduct(prod.id)}><i className="fas fa-trash"></i></button>
                           </div>
                         </div>
                       </div>
