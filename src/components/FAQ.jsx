@@ -73,7 +73,7 @@ const FAQ = () => {
     { question: 'How do I install terrazzo tiles?', answer: 'Terrazzo tiles should be installed by a professional using a suitable adhesive for stone tiles. Ensure the subfloor is clean, flat, and dry. Grout joints of <strong>1.5–2 mm</strong> are recommended.' },
     { question: 'How do I clean and maintain terrazzo?', answer: 'Use a <strong>pH-neutral cleaner</strong> and a damp mop for daily cleaning — avoid acidic cleaners like vinegar as they can etch the surface. Re-seal every <strong>1–2 years</strong> depending on traffic.' },
     { question: 'Do you ship internationally?', answer: 'Yes, we ship worldwide. Shipping costs and times vary by destination. Please contact us at <a href="https://mail.google.com/mail/?view=cm&to=limfactoryy@gmail.com" target="_blank" style="color: var(--accent-color);">limfactoryy@gmail.com</a> for a quote.' },
-    { question: 'What is the minimum order quantity?', answer: 'For standard collections, the minimum order is <strong>20 sqm</strong>. For custom orders, minimums may vary.' },
+    { question: 'What is the minimum order quantity?', answer: 'For standard collections, the minimum order is <strong>20 sqft</strong>. For custom orders, minimums may vary.' },
   ];
 
   return (
