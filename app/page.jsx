@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../src/supabase';
+import { supabase, prefetchData, getProductByIdFromCache } from '../src/supabase';
 import Navbar from '../src/components/Navbar';
 import Hero from '../src/components/Hero';
 import Collections from '../src/components/Collections';
@@ -33,18 +33,32 @@ const Home = () => {
   const handleOpenProduct = async (prod) => {
     let fullProd = prod;
     if (!prod.desc) {
-       const { data } = await supabase.from('products').select('*').eq('id', prod.id).single();
-       if (data) {
+       const cached = getProductByIdFromCache(prod.id);
+       if (cached) {
            fullProd = {
-             id: data.id,
-             name: data.name || data.title || 'Unnamed',
-             desc: data.description || data.desc || data.detail || '',
-             img: data.imageurl || data.imgurl || data.image || data.img || data.pic || '',
-             sizesImg: data.sizesimageurl || data.sizeimage || data.sizesimage || data.sizepic || '',
-             sizes: data.sizes || data.size || data.availablesizes || data.available_sizes || data['available sizes'] || data['Available Sizes'] || '',
-             refcode: data.refcode || data.referencecode || data.code || data.refercode || '',
-             price: data.price || data.cost || ''
+             id: cached.id,
+             name: cached.name || cached.title || 'Unnamed',
+             desc: cached.description || cached.desc || cached.detail || '',
+             img: cached.imageurl || cached.imgurl || cached.image || cached.img || cached.pic || '',
+             sizesImg: cached.sizesimageurl || cached.sizeimage || cached.sizesimage || cached.sizepic || '',
+             sizes: cached.sizes || cached.size || cached.availablesizes || cached.available_sizes || cached['available sizes'] || cached['Available Sizes'] || '',
+             refcode: cached.refcode || cached.referencecode || cached.code || cached.refercode || '',
+             price: cached.price || cached.cost || ''
            };
+       } else {
+           const { data } = await supabase.from('products').select('*').eq('id', prod.id).single();
+           if (data) {
+               fullProd = {
+                 id: data.id,
+                 name: data.name || data.title || 'Unnamed',
+                 desc: data.description || data.desc || data.detail || '',
+                 img: data.imageurl || data.imgurl || data.image || data.img || data.pic || '',
+                 sizesImg: data.sizesimageurl || data.sizeimage || data.sizesimage || data.sizepic || '',
+                 sizes: data.sizes || data.size || data.availablesizes || data.available_sizes || data['available sizes'] || data['Available Sizes'] || '',
+                 refcode: data.refcode || data.referencecode || data.code || data.refercode || '',
+                 price: data.price || data.cost || ''
+               };
+           }
        }
     }
     setSelectedProduct(fullProd);
@@ -61,6 +75,9 @@ const Home = () => {
   };
 
   useEffect(() => {
+    // Start prefetching data immediately on mount
+    prefetchData();
+
     // Sticky Nav & Scroll handling
     const navbar = document.getElementById('navbar');
     const handleScroll = () => {

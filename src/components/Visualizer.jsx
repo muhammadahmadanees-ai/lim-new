@@ -1,6 +1,6 @@
 "use client";
 import React, { useRef, useEffect, useState } from 'react';
-import { supabase } from '../supabase';
+import { supabase, getAllProductsFromCache } from '../supabase';
 
 const Visualizer = () => {
   const uploadAreaRef = useRef(null);
@@ -14,15 +14,36 @@ const Visualizer = () => {
   const [selectedTile, setSelectedTile] = useState(null);
   const [isTileLoading, setIsTileLoading] = useState(false);
   const [loadedImagesCount, setLoadedImagesCount] = useState(0);
+  const preloadedImagesRef = useRef({});
 
   useEffect(() => {
+    const setupTiles = (allProds) => {
+      const validTiles = (allProds || []).filter(t => t.img && t.img.trim() !== '' && t.img !== 'null');
+      setTiles(validTiles);
+      
+      // Preload images into memory
+      validTiles.forEach(t => {
+        if (!preloadedImagesRef.current[t.id]) {
+          const img = new Image();
+          img.src = t.img;
+          img.onload = () => setLoadedImagesCount(prev => prev + 1);
+          img.onerror = () => setLoadedImagesCount(prev => prev + 1);
+          preloadedImagesRef.current[t.id] = img;
+        }
+      });
+    };
+
+    const cachedProds = getAllProductsFromCache();
+    if (cachedProds) {
+      setupTiles(cachedProds);
+      return;
+    }
+
     const fetchTiles = async () => {
       try {
         const { data: fetchedTiles, error } = await supabase.from("products").select('id, name, img').not('img', 'is', null).order('order');
         if (error) throw error;
-        // Some products might have empty string or just the word 'null'
-        const validTiles = (fetchedTiles || []).filter(t => t.img && t.img.trim() !== '' && t.img !== 'null');
-        setTiles(validTiles);
+        setupTiles(fetchedTiles);
       } catch (e) {
         console.error("Error fetching visualizer tiles", e);
       }
@@ -163,7 +184,7 @@ const Visualizer = () => {
         ctx.closePath();
         ctx.clip();
 
-        const dynSubdiv = (dragging !== null) ? 4 : 20;
+        const dynSubdiv = (dragging !== null) ? 4 : 12;
 
         for (let row = 0; row < dynSubdiv; row++) {
             for (let col = 0; col < dynSubdiv; col++) {
@@ -245,7 +266,12 @@ const Visualizer = () => {
     const onDown = (e) => {
         if (!roomImg) return;
         const pos = getEventPos(e);
-        dragging = pts.findIndex(p => Math.hypot(p.x - pos.x, p.y - pos.y) <= HANDLE_R * 1.5);
+        const idx = pts.findIndex(p => Math.hypot(p.x - pos.x, p.y - pos.y) <= HANDLE_R * 1.5);
+        if (idx !== -1) {
+            dragging = idx;
+            e.preventDefault(); // Prevent touch scroll/text selection lag immediately
+            render(); // Switch dynSubdiv grid to dragging resolution (4x4) before first movement
+        }
     };
 
     const onMove = (e) => {
@@ -272,7 +298,15 @@ const Visualizer = () => {
     canvas.addEventListener('touchmove', onMove, {passive:false});
     window.addEventListener('touchend', onUp);
 
-    window.visualizerSelectTile = (url, setLoading) => {
+    window.visualizerSelectTile = (tileId, url, setLoading) => {
+      const cached = preloadedImagesRef.current[tileId];
+      if (cached && cached.complete && cached.naturalWidth !== 0) {
+        tileImg = cached;
+        buildOffscreen();
+        render();
+        return;
+      }
+
       if (setLoading) setLoading(true);
       const img = new Image();
       img.onload = () => {
@@ -362,17 +396,9 @@ const Visualizer = () => {
                     onClick={() => {
                       if (isTileLoading) return;
                       setSelectedTile(tile.id);
-                      window.visualizerSelectTile(tile.img, setIsTileLoading);
+                      window.visualizerSelectTile(tile.id, tile.img, setIsTileLoading);
                     }}
-                  >
-                    <img 
-                      src={tile.img} 
-                      style={{display: 'none'}} 
-                      onLoad={() => setLoadedImagesCount(prev => prev + 1)}
-                      onError={() => setLoadedImagesCount(prev => prev + 1)}
-                      alt=""
-                    />
-                  </div>
+                  />
                 ))}
               </div>
               <div className="visualizer-sliders">

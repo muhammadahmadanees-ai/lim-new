@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { supabase } from '../supabase';
+import { supabase, getAllProductsFromCache } from '../supabase';
 
 const SearchModal = ({ onClose, onOpenProduct }) => {
   const [query, setQuery] = useState('');
@@ -21,6 +21,19 @@ const SearchModal = ({ onClose, onOpenProduct }) => {
         return;
       }
       setLoading(true);
+
+      const allProds = getAllProductsFromCache();
+      if (allProds) {
+        const lowerQuery = query.toLowerCase();
+        const localResults = allProds.filter(p => 
+          (p.name || '').toLowerCase().includes(lowerQuery) || 
+          (p.refcode || '').toLowerCase().includes(lowerQuery)
+        );
+        setResults(localResults);
+        setLoading(false);
+        return;
+      }
+
       try {
         const { data, error } = await supabase
           .from('products')

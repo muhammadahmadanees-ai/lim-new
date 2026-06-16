@@ -156,7 +156,7 @@ const ProductModal = ({ product, onClose, onOpenLightbox, onOpenSampleForm }) =>
           <div className="pm-social-row">
             <a href={`https://wa.me/923164934687?text=${encodeURIComponent(`Hello! I'm interested in the ${product.name} tile. Check it out here: ${window.location.href}`)}`} target="_blank" rel="noreferrer" className="pm-social-icon whatsapp" title="Order via WhatsApp"><i className="fab fa-whatsapp"></i></a>
             <a href="https://ig.me/m/terrazzobylimfactory" target="_blank" rel="noreferrer" className="pm-social-icon instagram" title="Order via Instagram"><i className="fab fa-instagram"></i></a>
-            <a href="https://mail.google.com/mail/?view=cm&to=limfactoryy@gmail.com" target="_blank" rel="noreferrer" className="pm-social-icon email" title="Order via Email"><i className="fas fa-envelope"></i></a>
+            <a href={`https://mail.google.com/mail/?view=cm&to=limfactoryy@gmail.com&su=${encodeURIComponent(`Inquiry for ${product.name}`)}&body=${encodeURIComponent(`Hello LIM Factory,\n\nI am interested in learning more about the product: ${product.name}.\nReference Code: ${product.refcode || 'N/A'}\nLink: ${window.location.href}\n\nPlease share the pricing and availability details.\n\nThank you!`)}`} target="_blank" rel="noreferrer" className="pm-social-icon email" title="Order via Email"><i className="fas fa-envelope"></i></a>
           </div>
 
           <div className="pm-buttons-row">
