@@ -58,6 +58,9 @@ const Admin = () => {
   const [replyData, setReplyData] = useState({ orderId: '', name: '', email: '', phone: '', message: '', replyMsg: '' });
   const [replyStatus, setReplyStatus] = useState('');
 
+  const productDragTimeoutRef = useRef(null);
+  const collectionDragTimeoutRef = useRef(null);
+
   useEffect(() => {
     emailjs.init("JeeX6f6eeMESMyxnL"); // From old-site/admin.html
 
@@ -76,7 +79,11 @@ const Admin = () => {
         fetchOrders();
       }
     });
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+      if (productDragTimeoutRef.current) clearTimeout(productDragTimeoutRef.current);
+      if (collectionDragTimeoutRef.current) clearTimeout(collectionDragTimeoutRef.current);
+    };
   }, []);
 
   const handleLogin = async (e) => {
@@ -96,15 +103,12 @@ const Admin = () => {
       if (error) throw error;
       setCollectionsList(data || []);
       
-      // Calculate total products
-      let total = 0;
-      for (const col of (data || [])) {
-          if (col.type !== 'category') {
-              const { count } = await supabase.from("products").select('id', {count: 'exact', head: true}).eq('collection_id', col.id);
-              total += count || 0;
-          }
-      }
-      setTotalProductsCount(total);
+      // Calculate total products in one fast query
+      const { count, error: countError } = await supabase
+        .from("products")
+        .select('id', { count: 'exact', head: true });
+      if (countError) throw countError;
+      setTotalProductsCount(count || 0);
     } catch (e) {
       console.warn("fetchCollections failed", e);
       setCollectionsList([]);
@@ -264,17 +268,41 @@ const Admin = () => {
   const onCollectionsSortEnd = (newList) => {
     const updatedList = newList.map((col, index) => ({ ...col, order: index }));
     setCollectionsList(updatedList);
-    updatedList.forEach(async (update) => {
-      await supabase.from('collections').update({ order: update.order }).eq('id', update.id);
-    });
+
+    if (collectionDragTimeoutRef.current) {
+      clearTimeout(collectionDragTimeoutRef.current);
+    }
+
+    collectionDragTimeoutRef.current = setTimeout(async () => {
+      const updates = updatedList.map(col => ({
+        id: col.id,
+        order: col.order
+      }));
+      const { error } = await supabase.from('collections').upsert(updates);
+      if (error) {
+        console.error("Failed to update collections order", error);
+      }
+    }, 500);
   };
 
   const onProductsSortEnd = (newList) => {
     const updatedList = newList.map((prod, index) => ({ ...prod, order: index }));
     setProductsList(updatedList);
-    updatedList.forEach(async (update) => {
-      await supabase.from('products').update({ order: update.order }).eq('id', update.id);
-    });
+
+    if (productDragTimeoutRef.current) {
+      clearTimeout(productDragTimeoutRef.current);
+    }
+
+    productDragTimeoutRef.current = setTimeout(async () => {
+      const updates = updatedList.map(prod => ({
+        id: prod.id,
+        order: prod.order
+      }));
+      const { error } = await supabase.from('products').upsert(updates);
+      if (error) {
+        console.error("Failed to update products order", error);
+      }
+    }, 500);
   };
 
   // --- Orders Logic ---
