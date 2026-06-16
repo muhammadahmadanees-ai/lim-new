@@ -261,20 +261,26 @@ const Admin = () => {
   };
 
   // --- Sortable Handlers ---
-  const saveCollectionsOrder = async () => {
-    const updatedList = collectionsList.map((col, index) => ({ ...col, order: index }));
+  const handleCollectionsSortEnd = (newList) => {
+    const updatedList = newList.map((col, index) => ({ ...col, order: index }));
     setCollectionsList(updatedList);
-    const updates = updatedList.map(update => 
+  };
+
+  const saveCollectionsOrder = async () => {
+    const updates = collectionsList.map(update => 
       supabase.from('collections').update({ order: update.order }).eq('id', update.id)
     );
     await Promise.all(updates);
     alert('Collection order saved successfully!');
   };
 
-  const saveProductsOrder = async () => {
-    const updatedList = productsList.map((prod, index) => ({ ...prod, order: index }));
+  const handleProductsSortEnd = (newList) => {
+    const updatedList = newList.map((prod, index) => ({ ...prod, order: index }));
     setProductsList(updatedList);
-    const updates = updatedList.map(update => 
+  };
+
+  const saveProductsOrder = async () => {
+    const updates = productsList.map(update => 
       supabase.from('products').update({ order: update.order }).eq('id', update.id)
     );
     await Promise.all(updates);
@@ -599,7 +605,7 @@ const Admin = () => {
                 {collectionsList.length === 0 ? <p>No collections found.</p> : (
                   <ReactSortable 
                     list={collectionsList} 
-                    setList={setCollectionsList} 
+                    setList={handleCollectionsSortEnd} 
                     className="admin-grid" 
                     animation={150} 
                     ghostClass="dragging"
@@ -650,7 +656,7 @@ const Admin = () => {
                 {productsList.length === 0 ? <p>No products found in this collection.</p> : (
                   <ReactSortable 
                     list={productsList} 
-                    setList={setProductsList} 
+                    setList={handleProductsSortEnd} 
                     className="admin-grid" 
                     animation={150} 
                     ghostClass="dragging"
