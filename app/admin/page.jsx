@@ -58,9 +58,6 @@ const Admin = () => {
   const [replyData, setReplyData] = useState({ orderId: '', name: '', email: '', phone: '', message: '', replyMsg: '' });
   const [replyStatus, setReplyStatus] = useState('');
 
-  const colSortTimeout = useRef(null);
-  const prodSortTimeout = useRef(null);
-
   useEffect(() => {
     emailjs.init("JeeX6f6eeMESMyxnL"); // From old-site/admin.html
 
@@ -264,28 +261,24 @@ const Admin = () => {
   };
 
   // --- Sortable Handlers ---
-  const onCollectionsSortEnd = (newList) => {
-    const updatedList = newList.map((col, index) => ({ ...col, order: index }));
+  const saveCollectionsOrder = async () => {
+    const updatedList = collectionsList.map((col, index) => ({ ...col, order: index }));
     setCollectionsList(updatedList);
-    
-    if (colSortTimeout.current) clearTimeout(colSortTimeout.current);
-    colSortTimeout.current = setTimeout(async () => {
-      for (const update of updatedList) {
-        await supabase.from('collections').update({ order: update.order }).eq('id', update.id);
-      }
-    }, 1000);
+    const updates = updatedList.map(update => 
+      supabase.from('collections').update({ order: update.order }).eq('id', update.id)
+    );
+    await Promise.all(updates);
+    alert('Collection order saved successfully!');
   };
 
-  const onProductsSortEnd = (newList) => {
-    const updatedList = newList.map((prod, index) => ({ ...prod, order: index }));
+  const saveProductsOrder = async () => {
+    const updatedList = productsList.map((prod, index) => ({ ...prod, order: index }));
     setProductsList(updatedList);
-    
-    if (prodSortTimeout.current) clearTimeout(prodSortTimeout.current);
-    prodSortTimeout.current = setTimeout(async () => {
-      for (const update of updatedList) {
-        await supabase.from('products').update({ order: update.order }).eq('id', update.id);
-      }
-    }, 1000);
+    const updates = updatedList.map(update => 
+      supabase.from('products').update({ order: update.order }).eq('id', update.id)
+    );
+    await Promise.all(updates);
+    alert('Product order saved successfully!');
   };
 
   // --- Orders Logic ---
@@ -598,12 +591,15 @@ const Admin = () => {
               <>
                 <div className="header-action">
                   <h3>Manage Collections <span style={{fontSize: '0.8rem', fontWeight: 'normal', color: '#888', marginLeft: '10px'}}>(Drag to reorder)</span></h3>
-                  <button className="btn" onClick={() => { setColFormData({ id: '', name: '', description: '', img: '', order: 0, parentId: '', type: 'collection' }); setIsColModalOpen(true); }}><i className="fas fa-plus"></i> Add Collection</button>
+                  <div>
+                    <button className="btn" style={{ marginRight: '10px', backgroundColor: '#2ecc71', borderColor: '#27ae60' }} onClick={saveCollectionsOrder}><i className="fas fa-save"></i> Save Order</button>
+                    <button className="btn" onClick={() => { setColFormData({ id: '', name: '', description: '', img: '', order: 0, parentId: '', type: 'collection' }); setIsColModalOpen(true); }}><i className="fas fa-plus"></i> Add Collection</button>
+                  </div>
                 </div>
                 {collectionsList.length === 0 ? <p>No collections found.</p> : (
                   <ReactSortable 
                     list={collectionsList} 
-                    setList={onCollectionsSortEnd} 
+                    setList={setCollectionsList} 
                     className="admin-grid" 
                     animation={150} 
                     ghostClass="dragging"
@@ -646,12 +642,15 @@ const Admin = () => {
                     <button className="btn" style={{ background: 'var(--light-bg)', color: 'var(--text-color)', marginRight: '15px' }} onClick={() => setCurrentCollection(null)}><i className="fas fa-arrow-left"></i> Back</button>
                     <h3 style={{ display: 'inline-block' }}>{currentCollection.name || currentCollection.title} Products</h3>
                   </div>
-                  <button className="btn" onClick={() => { setProdFormData({ id: '', name: '', price: '', description: '', img: '', sizes: '', refcode: '', order: 0 }); setIsProdModalOpen(true); }}><i className="fas fa-plus"></i> Add Product</button>
+                  <div>
+                    <button className="btn" style={{ marginRight: '10px', backgroundColor: '#2ecc71', borderColor: '#27ae60' }} onClick={saveProductsOrder}><i className="fas fa-save"></i> Save Order</button>
+                    <button className="btn" onClick={() => { setProdFormData({ id: '', name: '', price: '', description: '', img: '', sizes: '', refcode: '', order: 0 }); setIsProdModalOpen(true); }}><i className="fas fa-plus"></i> Add Product</button>
+                  </div>
                 </div>
                 {productsList.length === 0 ? <p>No products found in this collection.</p> : (
                   <ReactSortable 
                     list={productsList} 
-                    setList={onProductsSortEnd} 
+                    setList={setProductsList} 
                     className="admin-grid" 
                     animation={150} 
                     ghostClass="dragging"
