@@ -17,6 +17,8 @@ import OrderModal from '../src/components/OrderModal';
 import SampleFormModal from '../src/components/SampleFormModal';
 import Lightbox from '../src/components/Lightbox';
 import SearchModal from '../src/components/SearchModal';
+import ScrollToTop from '../src/components/ScrollToTop';
+import WhatsAppButton from '../src/components/WhatsAppButton';
 
 const Home = () => {
   const [selectedCollection, setSelectedCollection] = useState(null);
@@ -32,7 +34,7 @@ const Home = () => {
 
   const handleOpenProduct = async (prod) => {
     let fullProd = prod;
-    if (!prod.desc) {
+    if (!prod.desc || !prod.refcode || prod.refcode === 'N/A') {
        const cached = getProductByIdFromCache(prod.id);
        if (cached) {
            fullProd = {
@@ -186,6 +188,8 @@ const Home = () => {
       {lightboxImg && (
         <Lightbox img={lightboxImg} onClose={() => setLightboxImg(null)} />
       )}
+      <ScrollToTop />
+      <WhatsAppButton />
       </main>
     </div>
   );
