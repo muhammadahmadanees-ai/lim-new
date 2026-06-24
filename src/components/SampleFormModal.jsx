@@ -35,20 +35,24 @@ const SampleFormModal = ({ onClose, initialProduct }) => {
         body: submitData
       });
       
-      // Save to Supabase Orders Table
-      await supabase.from('orders').insert([{
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
-        collection: formData.collection,
-        tile: formData.tile,
-        quantity: formData.quantity,
-        address: formData.address,
-        city: formData.city,
-        message: formData.notes,
-        type: 'Sample Request',
-        status: 'new'
-      }]);
+      // Save to Supabase Orders Table (Non-blocking)
+      try {
+        await supabase.from('orders').insert([{
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          collection: formData.collection,
+          tile: formData.tile,
+          quantity: formData.quantity,
+          address: formData.address,
+          city: formData.city,
+          message: formData.notes,
+          type: 'Sample Request',
+          status: 'new'
+        }]);
+      } catch (dbError) {
+        console.warn("Database logging failed:", dbError);
+      }
 
       if (response.status === 200) {
         setStatus('success');

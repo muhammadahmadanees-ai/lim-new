@@ -21,14 +21,18 @@ const Contact = () => {
       });
       const json = await response.json();
 
-      // Save to Supabase Orders Table
-      await supabase.from('orders').insert([{
-        name: formData.get("name"),
-        email: formData.get("email"),
-        message: formData.get("message"),
-        type: 'General Inquiry',
-        status: 'new'
-      }]);
+      // Save to Supabase Orders Table (Non-blocking)
+      try {
+        await supabase.from('orders').insert([{
+          name: formData.get("name"),
+          email: formData.get("email"),
+          message: formData.get("message"),
+          type: 'General Inquiry',
+          status: 'new'
+        }]);
+      } catch (dbError) {
+        console.warn("Database logging failed:", dbError);
+      }
 
       if (response.status === 200) {
         btn.textContent = 'Sent Successfully!';

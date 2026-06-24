@@ -142,7 +142,7 @@
     flex-wrap: nowrap;
     justify-content: flex-start;
     align-items: flex-end; /* Align bottoms so labels sit on a baseline */
-    gap: 15px;
+    gap: 24px;
     margin-bottom: 15px;
 }
 
@@ -152,7 +152,7 @@
     align-items: center;
     justify-content: flex-end; /* Push content down */
     cursor: pointer;
-    height: 70px; /* Give a fixed height so labels align at the bottom */
+    height: 80px; /* Increased to fit 60px height geometrically aligned boxes with labels */
 }
 
 .pm-size-box {
@@ -172,6 +172,7 @@
     font-size: 9px;
     color: #555;
     margin-top: 6px;
+    white-space: nowrap;
 }
 
 .pm-contact-label {

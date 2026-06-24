@@ -33,11 +33,11 @@ const ShrinkTextModal = ({ text }) => {
 };
 
 const PREDEFINED_SIZES = [
-  { id: '30x30', w: 20, h: 20 },
-  { id: '30x60', w: 20, h: 40 },
-  { id: '45x45', w: 26, h: 26 },
-  { id: '60x60', w: 32, h: 32 },
-  { id: '60x120', w: 24, h: 48 },
+  { id: '30x30', w: 15, h: 15 },
+  { id: '30x60', w: 15, h: 30 },
+  { id: '45x45', w: 23, h: 23 },
+  { id: '60x60', w: 30, h: 30 },
+  { id: '60x120', w: 30, h: 60 },
 ];
 
 const ProductModal = ({ product, onClose, onOpenLightbox, onOpenSampleForm }) => {
@@ -125,15 +125,13 @@ const ProductModal = ({ product, onClose, onOpenLightbox, onOpenSampleForm }) =>
                     const predefined = PREDEFINED_SIZES.find(ps => ps.id.toLowerCase() === sizeStr.toLowerCase());
                     if (predefined) return predefined;
                     
-                    let w = 26, h = 26; 
+                    let w = 23, h = 23; 
                     const match = sizeStr.match(/(\d+)\s*x\s*(\d+)/i);
                     if (match) {
                         const widthCm = parseInt(match[1]);
                         const heightCm = parseInt(match[2]);
-                        w = Math.round(widthCm * 0.58);
-                        h = Math.round(heightCm * 0.58);
-                        w = Math.min(Math.max(w, 15), 50);
-                        h = Math.min(Math.max(h, 15), 50);
+                        w = Math.round(widthCm * 0.5);
+                        h = Math.round(heightCm * 0.5);
                     }
                     return { id: sizeStr, w, h };
                 })
@@ -144,6 +142,7 @@ const ProductModal = ({ product, onClose, onOpenLightbox, onOpenSampleForm }) =>
                   key={sz.id} 
                   className={`pm-size-item ${selectedSize === sz.id ? 'selected' : ''}`}
                   onClick={() => setSelectedSize(sz.id)}
+                  style={{ width: `${sz.w}px` }}
                 >
                   <div className="pm-size-box" style={{ width: `${sz.w}px`, height: `${sz.h}px` }}></div>
                   <div className="pm-size-label">{sz.id}</div>
