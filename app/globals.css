@@ -417,7 +417,7 @@ header.scrolled {
 }
 
 .card-content {
-    padding: var(--spacing-md);
+    padding: 1.5rem 1.25rem;
 }
 
 .card-desc {

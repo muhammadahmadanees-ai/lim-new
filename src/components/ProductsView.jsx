@@ -3,37 +3,24 @@ import React, { useEffect, useState } from 'react';
 import { supabase, fetchProductsCached, getProductsCache } from '../supabase';
 
 const ShrinkText = ({ text }) => {
-  const textRef = React.useRef(null);
-  React.useEffect(() => {
-    const el = textRef.current;
-    if (!el) return;
-    
-    const resizeText = () => {
-      el.style.fontSize = ''; 
-      let currentFontSize = parseFloat(window.getComputedStyle(el).fontSize);
-      
-      while (el.scrollWidth > el.clientWidth && currentFontSize > 10) {
-        currentFontSize -= 0.5;
-        el.style.fontSize = `${currentFontSize}px`;
-      }
-    };
-
-    resizeText();
-    // Use a small timeout to ensure fonts are loaded
-    setTimeout(resizeText, 100);
-    
-    window.addEventListener('resize', resizeText);
-    return () => window.removeEventListener('resize', resizeText);
-  }, [text]);
-  
   return (
-    <h3 ref={textRef} style={{ margin: '0', fontWeight: 'bold', width: '100%', whiteSpace: 'nowrap', overflow: 'hidden' }}>
+    <h3 style={{
+      margin: '0',
+      fontWeight: 'bold',
+      width: '100%',
+      whiteSpace: 'nowrap',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      fontSize: '1.2rem',
+      textAlign: 'left',
+      lineHeight: '1.2'
+    }}>
       {text}
     </h3>
   );
 };
 
-const ProductsView = ({ collectionData, onBack, onOpenProduct }) => {
+const ProductsView = ({ collectionData, onBack, onOpenProduct, onOpenLightbox }) => {
   const processProducts = (rawProducts) => {
     const prods = [];
     rawProducts.forEach((rawData) => {
@@ -123,7 +110,13 @@ const ProductsView = ({ collectionData, onBack, onOpenProduct }) => {
                     backgroundOrigin: 'content-box, padding-box',
                     cursor: 'zoom-in'
                   } : {}}
-                  title={prod.img ? 'Product Image' : ''}
+                  title={prod.img ? 'Click to view full image' : ''}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (prod.img && onOpenLightbox) {
+                      onOpenLightbox(prod.img);
+                    }
+                  }}
                 >
                   {!prod.img && <span>Product Image</span>}
                 </div>

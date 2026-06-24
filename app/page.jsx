@@ -138,6 +138,7 @@ const Home = () => {
           collectionData={selectedCollection} 
           onBack={() => setSelectedCollection(null)} 
           onOpenProduct={handleOpenProduct}
+          onOpenLightbox={(img) => setLightboxImg(img)}
         />
       </div>
       
