@@ -266,17 +266,31 @@ const Collections = ({ onSelectCollection, onOpenProduct }) => {
                       >
                         <div
                           className="img-placeholder explorer-card-img"
-                          style={item.img ? {
-                            backgroundImage: `url('${item.img}'), linear-gradient(#ffffff, #ffffff)`,
-                            backgroundSize: 'contain, cover',
-                            backgroundRepeat: 'no-repeat',
-                            backgroundPosition: 'center',
-                            color: 'transparent',
-                            padding: '1.5rem',
-                            backgroundOrigin: 'content-box, padding-box'
-                          } : {}}
+                          style={{
+                            position: 'relative',
+                            overflow: 'hidden',
+                            backgroundColor: '#ffffff'
+                          }}
                         >
-                          {!item.img && <i className={`fas ${isCategory ? 'fa-folder fa-4x' : 'fa-layer-group fa-4x'}`} style={{ color: '#ccc' }}></i>}
+                          {item.img ? (
+                            <img 
+                              src={item.img} 
+                              alt={item.name} 
+                              loading="lazy" 
+                              style={{
+                                position: 'absolute',
+                                top: 0,
+                                left: 0,
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'contain',
+                                padding: '1.5rem',
+                                boxSizing: 'border-box'
+                              }}
+                            />
+                          ) : (
+                            <i className={`fas ${isCategory ? 'fa-folder fa-4x' : 'fa-layer-group fa-4x'}`} style={{ color: '#ccc' }}></i>
+                          )}
                         </div>
                         <div className="card-content">
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>

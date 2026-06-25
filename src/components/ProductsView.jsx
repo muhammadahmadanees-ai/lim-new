@@ -100,16 +100,12 @@ const ProductsView = ({ collectionData, onBack, onOpenProduct, onOpenLightbox })
               <div className="collection-card fade-in-up" key={prod.id} style={{ opacity: 1, transform: 'translateY(0)' }}>
                 <div
                   className="img-placeholder"
-                  style={prod.img ? {
-                    backgroundImage: `url('${prod.img}'), linear-gradient(#ffffff, #ffffff)`,
-                    backgroundSize: 'contain, cover',
-                    backgroundRepeat: 'no-repeat',
-                    backgroundPosition: 'center',
-                    color: 'transparent',
-                    padding: '1.5rem',
-                    backgroundOrigin: 'content-box, padding-box',
-                    cursor: 'zoom-in'
-                  } : {}}
+                  style={{
+                    position: 'relative',
+                    overflow: 'hidden',
+                    cursor: prod.img ? 'zoom-in' : 'default',
+                    backgroundColor: '#ffffff'
+                  }}
                   title={prod.img ? 'Click to view full image' : ''}
                   onClick={(e) => {
                     e.stopPropagation();
@@ -118,7 +114,25 @@ const ProductsView = ({ collectionData, onBack, onOpenProduct, onOpenLightbox })
                     }
                   }}
                 >
-                  {!prod.img && <span>Product Image</span>}
+                  {prod.img ? (
+                    <img 
+                      src={prod.img} 
+                      alt={prod.name} 
+                      loading="lazy" 
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'contain',
+                        padding: '1.5rem',
+                        boxSizing: 'border-box'
+                      }}
+                    />
+                  ) : (
+                    <span>Product Image</span>
+                  )}
                 </div>
                 <div className="card-content">
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', width: '100%', gap: '0.4rem' }}>

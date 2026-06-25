@@ -26,6 +26,63 @@ ChartJS.register(
   ArcElement
 );
 
+// Client-side image compression helper using canvas
+const compressImage = (file, maxWidth = 1200, maxHeight = 1200, quality = 0.8) => {
+  return new Promise((resolve, reject) => {
+    if (!file || !file.type.startsWith('image/')) {
+      return resolve(file);
+    }
+
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target.result;
+      img.onload = () => {
+        let width = img.width;
+        let height = img.height;
+
+        if (width > maxWidth || height > maxHeight) {
+          if (width > height) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          } else {
+            width = Math.round((width * maxHeight) / height);
+            height = maxHeight;
+          }
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#ffffff'; // maintain white background for transparency
+        ctx.fillRect(0, 0, width, height);
+        ctx.drawImage(img, 0, 0, width, height);
+
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) {
+              return reject(new Error('Canvas toBlob returned null'));
+            }
+            // Create a new File object from the blob, converting format to jpeg
+            const compressedFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".jpg", {
+              type: 'image/jpeg',
+              lastModified: Date.now()
+            });
+            resolve(compressedFile);
+          },
+          'image/jpeg',
+          quality
+        );
+      };
+      img.onerror = (err) => reject(err);
+    };
+    reader.onerror = (err) => reject(err);
+  });
+};
+
 const Admin = () => {
   const [user, setUser] = useState(null);
   const [email, setEmail] = useState('');
@@ -174,14 +231,16 @@ const Admin = () => {
   };
 
   const handleColImageUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-    const filePath = `collections/${fileName}`;
+    const rawFile = e.target.files[0];
+    if (!rawFile) return;
 
     try {
+      // Compress the image before uploading to reduce egress and storage
+      const file = await compressImage(rawFile);
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const filePath = `collections/${fileName}`;
+
       const { error } = await supabase.storage.from('images').upload(filePath, file);
       if (error) throw error;
       
@@ -245,14 +304,16 @@ const Admin = () => {
   };
 
   const handleProdImageUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-    const filePath = `products/${fileName}`;
+    const rawFile = e.target.files[0];
+    if (!rawFile) return;
 
     try {
+      // Compress the image before uploading to reduce egress and storage
+      const file = await compressImage(rawFile);
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const filePath = `products/${fileName}`;
+
       const { error } = await supabase.storage.from('images').upload(filePath, file);
       if (error) throw error;
       

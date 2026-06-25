@@ -13,24 +13,12 @@ const Visualizer = () => {
   const [tiles, setTiles] = useState([]);
   const [selectedTile, setSelectedTile] = useState(null);
   const [isTileLoading, setIsTileLoading] = useState(false);
-  const [loadedImagesCount, setLoadedImagesCount] = useState(0);
   const preloadedImagesRef = useRef({});
 
   useEffect(() => {
     const setupTiles = (allProds) => {
       const validTiles = (allProds || []).filter(t => t.img && t.img.trim() !== '' && t.img !== 'null');
       setTiles(validTiles);
-      
-      // Preload images into memory
-      validTiles.forEach(t => {
-        if (!preloadedImagesRef.current[t.id]) {
-          const img = new Image();
-          img.src = t.img;
-          img.onload = () => setLoadedImagesCount(prev => prev + 1);
-          img.onerror = () => setLoadedImagesCount(prev => prev + 1);
-          preloadedImagesRef.current[t.id] = img;
-        }
-      });
     };
 
     const cachedProds = getAllProductsFromCache();
@@ -311,6 +299,7 @@ const Visualizer = () => {
       const img = new Image();
       img.onload = () => {
           tileImg = img;
+          preloadedImagesRef.current[tileId] = img; // cache the image for subsequent clicks
           buildOffscreen();
           render();
           if (setLoading) setLoading(false);
@@ -368,14 +357,7 @@ const Visualizer = () => {
               )}
               <canvas id="viz-canvas" ref={canvasRef}></canvas>
               <div className="viz-hint">
-                {tiles.length > 0 && loadedImagesCount < tiles.length ? (
-                  <span style={{ color: '#c8a96e', fontWeight: 'bold' }}>
-                    <i className="fas fa-spinner fa-spin" style={{marginRight: '8px'}}></i>
-                    Loading textures for optimal performance... ({Math.min(loadedImagesCount, tiles.length)}/{tiles.length})
-                  </span>
-                ) : (
-                  <span>Drag yellow corners + blue side handles to fit your floor</span>
-                )}
+                <span>Drag yellow corners + blue side handles to fit your floor</span>
               </div>
             </div>
             <div className="visualizer-controls">
@@ -387,18 +369,35 @@ const Visualizer = () => {
                     className="viz-tile-btn" 
                     title={tile.name} 
                     style={{ 
-                      backgroundImage: `url('${tile.img}')`, 
                       backgroundColor: '#f5f5f5', 
                       border: selectedTile === tile.id ? '2px solid var(--accent-color)' : '1px solid #e0e0e0',
                       boxShadow: selectedTile === tile.id ? '0 0 0 2px white inset' : 'none',
-                      opacity: isTileLoading && selectedTile !== tile.id ? 0.5 : 1
+                      opacity: isTileLoading && selectedTile !== tile.id ? 0.5 : 1,
+                      position: 'relative',
+                      overflow: 'hidden'
                     }} 
                     onClick={() => {
                       if (isTileLoading) return;
                       setSelectedTile(tile.id);
                       window.visualizerSelectTile(tile.id, tile.img, setIsTileLoading);
                     }}
-                  />
+                  >
+                    {tile.img && (
+                      <img 
+                        src={tile.img} 
+                        alt={tile.name} 
+                        loading="lazy" 
+                        style={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover'
+                        }}
+                      />
+                    )}
+                  </div>
                 ))}
               </div>
               <div className="visualizer-sliders">
