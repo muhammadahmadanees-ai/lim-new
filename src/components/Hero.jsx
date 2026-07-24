@@ -18,6 +18,20 @@ const Hero = () => {
       <div className="container hero-split-container">
         <div className="hero-content">
           <h1 className="fade-in-up hero-title">LESS IS MORE</h1>
+          {/* SEO: Keyword-rich subtitle — visible to Google, hidden visually */}
+          <span style={{
+            position: 'absolute',
+            width: '1px',
+            height: '1px',
+            padding: 0,
+            margin: '-1px',
+            overflow: 'hidden',
+            clip: 'rect(0,0,0,0)',
+            whiteSpace: 'nowrap',
+            borderWidth: 0
+          }}>
+            Premium terrazzo tiles and terrazzo chips tiles handcrafted from 100% recycled marble — LIM Factory
+          </span>
           <div className="hero-text-body fade-in-up delay-1" style={{ fontSize: '1rem', lineHeight: '1.6', color: 'var(--text-color)', opacity: 0.9, fontFamily: "'Century Gothic', sans-serif" }}>
             <p style={{ marginBottom: '1rem' }}>In a world of temporary finishes and visual noise, we believe materials should feel timeless.</p>
             <p style={{ marginBottom: '1rem' }}>Founded by architects, LIM Factory was created from a struggle to accept how surfaces today have lost their meaning. In the past, terrazzo floors and stone surfaces were not just finishes — they were part of people’s homes, memories, and architecture. They aged with time, carried craftsmanship, and gave spaces an identity.</p>
