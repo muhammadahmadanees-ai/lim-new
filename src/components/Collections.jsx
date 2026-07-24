@@ -275,7 +275,7 @@ const Collections = ({ onSelectCollection, onOpenProduct }) => {
                           {item.img ? (
                             <img 
                               src={item.img} 
-                              alt={item.name} 
+                              alt={`${item.name} — terrazzo ${item.type === 'category' ? 'tile collection' : 'chips tile'} by LIM Factory`}
                               loading="lazy" 
                               style={{
                                 position: 'absolute',
