@@ -1,0 +1,13 @@
+# robots.txt — LIM Factory (https://www.limfactory.co)
+# Allow all search engine crawlers
+
+User-agent: *
+Allow: /
+
+# Block Next.js internal routes from indexing
+Disallow: /_next/
+Disallow: /api/
+Disallow: /admin/
+
+# Sitemap location
+Sitemap: https://www.limfactory.co/sitemap.xml

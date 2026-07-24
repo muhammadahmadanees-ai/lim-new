@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+
+  <!-- Homepage -->
+  <url>
+    <loc>https://www.limfactory.co/</loc>
+    <lastmod>2026-07-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://www.limfactory.co/tiles_cover.png</image:loc>
+      <image:title>LIM Factory — Premium Terrazzo Tiles and Terrazzo Chips Tiles</image:title>
+      <image:caption>Handcrafted terrazzo tiles and terrazzo chips tiles made from 100% recycled marble</image:caption>
+    </image:image>
+  </url>
+
+  <!-- Collections Section -->
+  <url>
+    <loc>https://www.limfactory.co/#collections</loc>
+    <lastmod>2026-07-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- FAQ Section -->
+  <url>
+    <loc>https://www.limfactory.co/#faq</loc>
+    <lastmod>2026-07-25</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Contact Section -->
+  <url>
+    <loc>https://www.limfactory.co/#contact</loc>
+    <lastmod>2026-07-25</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+</urlset>
