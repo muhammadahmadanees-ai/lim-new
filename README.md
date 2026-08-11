@@ -1,5 +1,7 @@
 # LIM Factory | Premium Terrazzo & Stone Surfaces
 
+**Live Website:** [limfactory.co](https://www.limfactory.co/)
+
 Discover premium, handcrafted terrazzo tiles and surfaces designed for high-end residential and commercial spaces. Founded by architects, **LIM Factory (Less Is More)** creates materials that bring back a sense of depth, permanence, and timeless craftsmanship to modern architecture.
 
 This project is a modern web application built using **Next.js 16** and **React 19**, integrated with **Supabase** for database management and realtime updates, **EmailJS** for sample order dispatching, a custom **Admin Portal** with drag-and-drop catalog reordering and analytics, and a comprehensive, search-engine-optimized landing page structure.
