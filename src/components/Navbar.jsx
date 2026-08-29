@@ -27,7 +27,7 @@ const Navbar = ({ onOrderSamples, onToggleDrawer, onOpenSearch }) => {
         </button>
         <a href="#" className="logo nav-mobile-center">
           <img
-            src="https://kagimdnkyqfduhcbkceo.supabase.co/storage/v1/object/public/images/lim_transparent_logo.png"
+            src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/images/lim_transparent_logo.png`}
             alt="LIM Factory Logo"
             className="logo-img"
           />
