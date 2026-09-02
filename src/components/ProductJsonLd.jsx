@@ -77,40 +77,17 @@ export default function ProductJsonLd({ product, collection, breadcrumbs }) {
     productSchema.additionalProperty = additionalProps;
   }
 
-  // Offers — only if we have a real URL for this product
+  // Option A (Business Model Alignment):
+  // Since tile prices are not publicly displayed on the website (custom quote / B2B model),
+  // we omit 'offers' entirely to prevent price-mismatch policy violations.
+  // The Product schema remains fully valid and descriptive for crawlers.
   const productUrl = product.slug
     ? `${BASE_URL}/products/${product.slug}`
     : undefined;
 
   if (productUrl) {
-    const offer = {
-      '@type': 'Offer',
-      url: productUrl,
-      availability: 'https://schema.org/InStock',
-      itemCondition: 'https://schema.org/NewCondition',
-      seller: {
-        '@id': `${BASE_URL}/#organization`,
-      },
-      shippingDetails: {
-        '@type': 'OfferShippingDetails',
-        shippingDestination: {
-          '@type': 'DefinedRegion',
-          addressCountry: 'PK',
-        },
-      },
-    };
-
-    // Only add price if a real price value exists
-    // Price is currently hidden in the UI per business request,
-    // so we intentionally omit it from schema to avoid Google penalties.
-    // Uncomment and populate when prices are ready to be public:
-    //
-    // if (product.price) {
-    //   offer.priceCurrency = 'PKR';
-    //   offer.price = parsedPrice;
-    // }
-
-    productSchema.offers = offer;
+    productSchema['@id'] = `${productUrl}#product`;
+    productSchema.url = productUrl;
   }
 
   graph.push(productSchema);
