@@ -1,5 +1,7 @@
 "use client";
 import React, { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
+import { slugify } from '../lib/slugify';
 import './ProductModal.css';
 
 const ShrinkTextModal = ({ text }) => {
@@ -42,6 +44,26 @@ const PREDEFINED_SIZES = [
 
 const ProductModal = ({ product, onClose, onOpenLightbox, onOpenSampleForm }) => {
   const [selectedSize, setSelectedSize] = useState(null);
+
+  useEffect(() => {
+    if (product?.name) {
+      const slug = slugify(product.name);
+      const originalPath = window.location.pathname + window.location.hash;
+      window.history.pushState({ modal: true }, '', `/products/${slug}`);
+
+      const handlePopState = () => {
+        onClose();
+      };
+      window.addEventListener('popstate', handlePopState);
+
+      return () => {
+        window.removeEventListener('popstate', handlePopState);
+        if (window.location.pathname.startsWith('/products/')) {
+          window.history.pushState(null, '', originalPath || '/');
+        }
+      };
+    }
+  }, [product, onClose]);
 
   if (!product) return null;
 

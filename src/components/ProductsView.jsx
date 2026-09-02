@@ -1,6 +1,8 @@
 "use client";
 import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { supabase, fetchProductsCached, getProductsCache } from '../supabase';
+import { slugify } from '../lib/slugify';
 
 const ShrinkText = ({ text }) => {
   return (
@@ -140,9 +142,16 @@ const ProductsView = ({ collectionData, onBack, onOpenProduct, onOpenLightbox })
                     {prod.refcode && <span className="ref-code" style={{ fontWeight: 'normal' }}>{prod.refcode}</span>}
                   </div>
                   <p className="card-desc" style={{ marginTop: '0.4rem' }}>{prod.desc}</p>
-                  <a href="#" className="link view-details-btn" onClick={(e) => { e.preventDefault(); onOpenProduct(prod); }}>
+                  <Link 
+                    href={`/products/${slugify(prod.name)}`} 
+                    className="link view-details-btn" 
+                    onClick={(e) => { 
+                      e.preventDefault(); 
+                      onOpenProduct(prod); 
+                    }}
+                  >
                     View Details <span className="arrow-icon">&rarr;</span>
-                  </a>
+                  </Link>
                 </div>
               </div>
             ))}

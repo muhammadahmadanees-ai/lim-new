@@ -109,8 +109,32 @@ const Home = () => {
       observer.observe(el);
     });
 
-    return () => window.removeEventListener('scroll', handleScroll);
+    // Handle initial hash scrolling (e.g. /#visualizer, /#collections, /#faq, /#contact)
+    const handleHash = () => {
+      const hash = window.location.hash;
+      if (hash) {
+        const targetId = hash.replace('#', '');
+        const targetEl = document.getElementById(targetId);
+        if (targetEl) {
+          setTimeout(() => {
+            targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }, 150);
+        }
+      }
+    };
+
+    handleHash();
+    window.addEventListener('hashchange', handleHash);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('hashchange', handleHash);
+    };
   }, [selectedCollection]);
+
+  const handleResetToHome = () => {
+    setSelectedCollection(null);
+  };
 
   return (
     <div className="home-page">
@@ -119,6 +143,7 @@ const Home = () => {
         onOrderSamples={() => setIsOrderModalOpen(true)} 
         onToggleDrawer={() => setIsDrawerOpen(true)}
         onOpenSearch={() => setIsSearchOpen(true)}
+        onNavigate={handleResetToHome}
       />
       
       <MenuDrawer 
@@ -126,6 +151,7 @@ const Home = () => {
         onClose={() => setIsDrawerOpen(false)}
         onSelectCollection={setSelectedCollection}
         onOpenProduct={handleOpenProduct}
+        onNavigate={handleResetToHome}
       />
       
       <div style={{ display: !selectedCollection ? 'block' : 'none' }}>

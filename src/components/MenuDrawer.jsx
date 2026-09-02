@@ -3,7 +3,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { supabase } from '../supabase';
 import RecentlyViewed from './RecentlyViewed';
 
-const MenuDrawer = ({ isOpen, onClose, onSelectCollection, onOpenProduct }) => {
+const MenuDrawer = ({ isOpen, onClose, onSelectCollection, onOpenProduct, onNavigate }) => {
   const [collections, setCollections] = useState([]);
   const [treeRoots, setTreeRoots] = useState([]);
   const [allProducts, setAllProducts] = useState([]);
@@ -295,28 +295,28 @@ const MenuDrawer = ({ isOpen, onClose, onSelectCollection, onOpenProduct }) => {
             <h4 className="drawer-section-title">Navigation</h4>
             <ul className="drawer-nav-links">
               <li>
-                <a href="#" onClick={(e) => { e.preventDefault(); onClose(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
+                <a href="#" onClick={(e) => { e.preventDefault(); if (onNavigate) onNavigate(); onClose(); window.scrollTo({ top: 0, behavior: 'smooth' }); if (window.location.hash) window.history.pushState(null, '', window.location.pathname); }}>
                   <i className="fas fa-home section-link-icon"></i> Home
                 </a>
               </li>
               <li>
-                <a href="#collections" onClick={() => onClose()}>
+                <a href="#collections" onClick={(e) => { e.preventDefault(); if (onNavigate) onNavigate(); onClose(); const el = document.getElementById('collections'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); window.history.pushState(null, '', '#collections'); }}>
                   <i className="fas fa-cubes section-link-icon"></i> Collections
                 </a>
               </li>
 
               <li>
-                <a href="#visualizer" onClick={() => onClose()}>
+                <a href="#visualizer" onClick={(e) => { e.preventDefault(); if (onNavigate) onNavigate(); onClose(); const el = document.getElementById('visualizer'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); window.history.pushState(null, '', '#visualizer'); }}>
                   <i className="fas fa-palette section-link-icon"></i> Room Visualizer
                 </a>
               </li>
               <li>
-                <a href="#faq" onClick={() => onClose()}>
+                <a href="#faq" onClick={(e) => { e.preventDefault(); if (onNavigate) onNavigate(); onClose(); const el = document.getElementById('faq'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); window.history.pushState(null, '', '#faq'); }}>
                   <i className="fas fa-question-circle section-link-icon"></i> FAQ
                 </a>
               </li>
               <li>
-                <a href="#contact" onClick={() => onClose()}>
+                <a href="#contact" onClick={(e) => { e.preventDefault(); if (onNavigate) onNavigate(); onClose(); const el = document.getElementById('contact'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); window.history.pushState(null, '', '#contact'); }}>
                   <i className="fas fa-envelope section-link-icon"></i> Contact
                 </a>
               </li>

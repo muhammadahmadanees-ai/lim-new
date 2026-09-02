@@ -1,6 +1,8 @@
 "use client";
 import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { supabase, fetchCollectionsCached, getCollectionsCache } from '../supabase';
+import { slugify } from '../lib/slugify';
 import RecentlyViewed from './RecentlyViewed';
 
 const Collections = ({ onSelectCollection, onOpenProduct }) => {
@@ -301,9 +303,23 @@ const Collections = ({ onSelectCollection, onOpenProduct }) => {
                           </div>
                           <h3 style={{ fontWeight: 'bold' }}>{item.name}</h3>
                           <p className="card-desc">{item.desc}</p>
-                          <a href="#" className="link view-products-btn" onClick={(e) => { e.preventDefault(); e.stopPropagation(); selectNode(item); }}>
-                            {isCategory ? 'Open Folder' : 'View Products'} <span className="arrow-icon">&rarr;</span>
-                          </a>
+                          {isCategory ? (
+                            <a 
+                              href="#" 
+                              className="link view-products-btn" 
+                              onClick={(e) => { e.preventDefault(); e.stopPropagation(); selectNode(item); }}
+                            >
+                              Open Folder <span className="arrow-icon">&rarr;</span>
+                            </a>
+                          ) : (
+                            <Link 
+                              href={`/collections/${slugify(item.name)}`} 
+                              className="link view-products-btn" 
+                              onClick={(e) => { e.preventDefault(); e.stopPropagation(); selectNode(item); }}
+                            >
+                              View Products <span className="arrow-icon">&rarr;</span>
+                            </Link>
+                          )}
                         </div>
                       </div>
                     );
