@@ -1,4 +1,5 @@
 import './globals.css';
+import JsonLdSchema from '../src/components/JsonLdSchema';
 
 const BASE_URL = 'https://www.limfactory.co';
 
@@ -108,6 +109,9 @@ export default function RootLayout({ children }) {
         <meta name="language" content="English" />
         <meta name="revisit-after" content="7 days" />
         <meta name="rating" content="general" />
+
+        {/* Server-rendered JSON-LD structured data for search engines */}
+        <JsonLdSchema />
       </head>
       <body>
         {children}
