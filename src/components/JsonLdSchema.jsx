@@ -27,8 +27,8 @@ function buildJsonLdGraph() {
     logo: {
       '@type': 'ImageObject',
       '@id': `${BASE_URL}/#logo`,
-      url: 'https://wqkdkypfpgvubxfzokmg.supabase.co/storage/v1/object/public/images/lim_transparent_logo.png',
-      contentUrl: 'https://wqkdkypfpgvubxfzokmg.supabase.co/storage/v1/object/public/images/lim_transparent_logo.png',
+      url: `${process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://kagimdnkyqfduhcbkceo.supabase.co'}/storage/v1/object/public/images/lim_transparent_logo.png`,
+      contentUrl: `${process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://kagimdnkyqfduhcbkceo.supabase.co'}/storage/v1/object/public/images/lim_transparent_logo.png`,
       width: '512',
       height: '512',
     },
