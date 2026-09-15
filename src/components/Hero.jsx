@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useRef } from 'react';
+import Link from 'next/link';
 
 const Hero = () => {
   const videoRef = useRef(null);
@@ -38,7 +39,20 @@ const Hero = () => {
             <p style={{ marginBottom: '1rem' }}>Today, surfaces are often selected for trends alone.</p>
             <p style={{ marginBottom: '0' }}>LIM Factory exists to bring back that sense of depth. Through terrazzo crafted with precision, texture, and permanence, we create materials that do not merely cover spaces — they belong to them.</p>
           </div>
-          <a href="#collections" className="btn btn-primary fade-in-up delay-2">Explore Collections</a>
+          <Link
+            href="/collections"
+            onClick={(e) => {
+              const el = document.getElementById('collections');
+              if (el) {
+                e.preventDefault();
+                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                if (typeof window !== 'undefined') window.history.pushState(null, '', '/collections');
+              }
+            }}
+            className="btn btn-primary fade-in-up delay-2"
+          >
+            Explore Collections
+          </Link>
         </div>
         <div className="hero-video-wrapper">
           <video ref={videoRef} autoPlay loop muted playsInline src="https://res.cloudinary.com/doiujqcpw/video/upload/v1780236097/IMG_0671_cektka.mp4"></video>

@@ -1,6 +1,8 @@
 "use client";
 import React, { useEffect, useState, useRef } from 'react';
+import Link from 'next/link';
 import { supabase } from '../supabase';
+import { slugify } from '../lib/slugify';
 import RecentlyViewed from './RecentlyViewed';
 
 // Construct hierarchy dynamically
@@ -195,6 +197,13 @@ const MenuDrawer = ({ isOpen, onClose, onSelectCollection, onOpenProduct, onNavi
                   if (isCategory) {
                     setExpandedNodes(prev => ({ ...prev, [node.id]: !prev[node.id] }));
                   } else {
+                    const parent = collections.find(c => c.id === node.parentId);
+                    const path = parent
+                      ? `/collections/${slugify(parent.name)}/${slugify(node.name)}`
+                      : `/collections/${slugify(node.name)}`;
+                    if (typeof window !== 'undefined') {
+                      window.history.pushState(null, '', path);
+                    }
                     onSelectCollection(node);
                     onClose();
                   }
@@ -309,30 +318,29 @@ const MenuDrawer = ({ isOpen, onClose, onSelectCollection, onOpenProduct, onNavi
             <h4 className="drawer-section-title">Navigation</h4>
             <ul className="drawer-nav-links">
               <li>
-                <a href="#" onClick={(e) => { e.preventDefault(); if (onNavigate) onNavigate(); onClose(); window.scrollTo({ top: 0, behavior: 'smooth' }); if (window.location.hash) window.history.pushState(null, '', window.location.pathname); }}>
+                <Link href="/" onClick={(e) => { if (onNavigate) onNavigate(); onClose(); if (typeof window !== 'undefined' && window.location.pathname === '/') { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); window.history.pushState(null, '', '/'); } }}>
                   <i className="fas fa-home section-link-icon"></i> Home
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#collections" onClick={(e) => { e.preventDefault(); if (onNavigate) onNavigate(); onClose(); const el = document.getElementById('collections'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); window.history.pushState(null, '', '#collections'); }}>
+                <Link href="/collections" onClick={(e) => { if (onNavigate) onNavigate(); onClose(); const el = document.getElementById('collections'); if (el) { e.preventDefault(); el.scrollIntoView({ behavior: 'smooth', block: 'start' }); window.history.pushState(null, '', '/collections'); } }}>
                   <i className="fas fa-cubes section-link-icon"></i> Collections
-                </a>
+                </Link>
               </li>
-
               <li>
-                <a href="#visualizer" onClick={(e) => { e.preventDefault(); if (onNavigate) onNavigate(); onClose(); const el = document.getElementById('visualizer'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); window.history.pushState(null, '', '#visualizer'); }}>
+                <Link href="/visualizer" onClick={(e) => { if (onNavigate) onNavigate(); onClose(); const el = document.getElementById('visualizer'); if (el) { e.preventDefault(); el.scrollIntoView({ behavior: 'smooth', block: 'start' }); window.history.pushState(null, '', '/visualizer'); } }}>
                   <i className="fas fa-palette section-link-icon"></i> Room Visualizer
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#faq" onClick={(e) => { e.preventDefault(); if (onNavigate) onNavigate(); onClose(); const el = document.getElementById('faq'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); window.history.pushState(null, '', '#faq'); }}>
+                <Link href="/faq" onClick={(e) => { if (onNavigate) onNavigate(); onClose(); const el = document.getElementById('faq'); if (el) { e.preventDefault(); el.scrollIntoView({ behavior: 'smooth', block: 'start' }); window.history.pushState(null, '', '/faq'); } }}>
                   <i className="fas fa-question-circle section-link-icon"></i> FAQ
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#contact" onClick={(e) => { e.preventDefault(); if (onNavigate) onNavigate(); onClose(); const el = document.getElementById('contact'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); window.history.pushState(null, '', '#contact'); }}>
+                <Link href="/contact" onClick={(e) => { if (onNavigate) onNavigate(); onClose(); const el = document.getElementById('contact'); if (el) { e.preventDefault(); el.scrollIntoView({ behavior: 'smooth', block: 'start' }); window.history.pushState(null, '', '/contact'); } }}>
                   <i className="fas fa-envelope section-link-icon"></i> Contact
-                </a>
+                </Link>
               </li>
             </ul>
           </div>

@@ -1,14 +1,15 @@
 "use client";
 import React from 'react';
+import Link from 'next/link';
 
 const Navbar = ({ onOrderSamples, onToggleDrawer, onOpenSearch, onNavigate }) => {
-  const handleNavClick = (e, sectionId) => {
+  const handleNavClick = (e, path, sectionId) => {
     if (onNavigate) onNavigate();
     if (!sectionId) {
-      e.preventDefault();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      if (window.location.hash) {
-        window.history.pushState(null, '', window.location.pathname);
+      if (typeof window !== 'undefined' && window.location.pathname === '/') {
+        e.preventDefault();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        window.history.pushState(null, '', '/');
       }
       return;
     }
@@ -16,7 +17,7 @@ const Navbar = ({ onOrderSamples, onToggleDrawer, onOpenSearch, onNavigate }) =>
     if (el) {
       e.preventDefault();
       el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      window.history.pushState(null, '', `#${sectionId}`);
+      window.history.pushState(null, '', path);
     }
   };
 
@@ -43,7 +44,7 @@ const Navbar = ({ onOrderSamples, onToggleDrawer, onOpenSearch, onNavigate }) =>
         >
           <i className="fas fa-bars"></i>
         </button>
-        <a href="#" className="logo nav-mobile-center" onClick={(e) => handleNavClick(e, '')}>
+        <Link href="/" className="logo nav-mobile-center" onClick={(e) => handleNavClick(e, '/', '')}>
           <img
             src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/images/lim_transparent_logo.png`}
             alt="LIM Factory Logo"
@@ -58,14 +59,14 @@ const Navbar = ({ onOrderSamples, onToggleDrawer, onOpenSearch, onNavigate }) =>
             <span style={{ color: '#000000' }}>OR</span>
             <span style={{ color: '#004aad' }}>Y</span>
           </span>
-        </a>
+        </Link>
         <nav>
           <ul className="nav-links pc-only-flex">
-            <li><a href="#" id="nav-home-btn" onClick={(e) => handleNavClick(e, '')}>Home</a></li>
-            <li><a href="#collections" onClick={(e) => handleNavClick(e, 'collections')}>Collections</a></li>
-            <li><a href="#visualizer" onClick={(e) => handleNavClick(e, 'visualizer')}>Visualizer</a></li>
-            <li><a href="#faq" onClick={(e) => handleNavClick(e, 'faq')}>FAQ</a></li>
-            <li><a href="#contact" onClick={(e) => handleNavClick(e, 'contact')}>Contact</a></li>
+            <li><Link href="/" id="nav-home-btn" onClick={(e) => handleNavClick(e, '/', '')}>Home</Link></li>
+            <li><Link href="/collections" onClick={(e) => handleNavClick(e, '/collections', 'collections')}>Collections</Link></li>
+            <li><Link href="/visualizer" onClick={(e) => handleNavClick(e, '/visualizer', 'visualizer')}>Visualizer</Link></li>
+            <li><Link href="/faq" onClick={(e) => handleNavClick(e, '/faq', 'faq')}>FAQ</Link></li>
+            <li><Link href="/contact" onClick={(e) => handleNavClick(e, '/contact', 'contact')}>Contact</Link></li>
           </ul>
         </nav>
         <div className="nav-actions nav-mobile-right">

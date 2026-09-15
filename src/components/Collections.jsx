@@ -84,6 +84,29 @@ const Collections = ({ onSelectCollection, onOpenProduct, initialCollections }) 
   const [activeNode, setActiveNode] = useState(null); // Selected category node in tree
   const [expandedNodes, setExpandedNodes] = useState(initialData ? initialData.initialExpanded : {});
 
+  // Sync activeNode with pathname on mount and popstate
+  useEffect(() => {
+    const syncFromUrl = () => {
+      if (typeof window === 'undefined' || collections.length === 0) return;
+      const path = window.location.pathname;
+      if (path === '/collections' || path === '/') {
+        setActiveNode(null);
+      } else if (path.startsWith('/collections/')) {
+        const segments = path.replace('/collections/', '').split('/').filter(Boolean);
+        if (segments.length >= 1) {
+          const cat = collections.find(c => c.type === 'category' && slugify(c.name) === segments[0]);
+          if (cat) {
+            setActiveNode(cat);
+          }
+        }
+      }
+    };
+
+    syncFromUrl();
+    window.addEventListener('popstate', syncFromUrl);
+    return () => window.removeEventListener('popstate', syncFromUrl);
+  }, [collections]);
+
   useEffect(() => {
     if (serverData || cachedSnapshot) return; // Skip if loaded from server props or cache
 
@@ -105,8 +128,6 @@ const Collections = ({ onSelectCollection, onOpenProduct, initialCollections }) 
     fetchCollections();
   }, [cachedSnapshot]);
 
-
-
   // Toggle tree node expansion
   const toggleExpand = (nodeId, e) => {
     e.stopPropagation();
@@ -120,10 +141,23 @@ const Collections = ({ onSelectCollection, onOpenProduct, initialCollections }) 
   const selectNode = (node) => {
     if (node === null) {
       setActiveNode(null);
+      if (typeof window !== 'undefined') {
+        window.history.pushState(null, '', '/collections');
+      }
     } else if (node.type === 'collection') {
+      const parent = collections.find(c => c.id === node.parentId);
+      const path = parent
+        ? `/collections/${slugify(parent.name)}/${slugify(node.name)}`
+        : `/collections/${slugify(node.name)}`;
+      if (typeof window !== 'undefined') {
+        window.history.pushState(null, '', path);
+      }
       onSelectCollection(node);
     } else {
       setActiveNode(node);
+      if (typeof window !== 'undefined') {
+        window.history.pushState(null, '', `/collections/${slugify(node.name)}`);
+      }
     }
   };
 
@@ -307,22 +341,28 @@ const Collections = ({ onSelectCollection, onOpenProduct, initialCollections }) 
                           <h3 style={{ fontWeight: 'bold' }}>{item.name}</h3>
                           <p className="card-desc">{item.desc}</p>
                           {isCategory ? (
-                            <a 
-                              href="#" 
-                              className="link view-products-btn" 
-                              onClick={(e) => { e.preventDefault(); e.stopPropagation(); selectNode(item); }}
-                            >
-                              Open Folder <span className="arrow-icon">&rarr;</span>
-                            </a>
-                          ) : (
                             <Link 
                               href={`/collections/${slugify(item.name)}`} 
                               className="link view-products-btn" 
                               onClick={(e) => { e.preventDefault(); e.stopPropagation(); selectNode(item); }}
                             >
-                              View Products <span className="arrow-icon">&rarr;</span>
+                              Open Folder <span className="arrow-icon">&rarr;</span>
                             </Link>
-                          )}
+                          ) : (() => {
+                            const itemParent = collections.find(c => c.id === item.parentId);
+                            const itemHref = itemParent
+                              ? `/collections/${slugify(itemParent.name)}/${slugify(item.name)}`
+                              : `/collections/${slugify(item.name)}`;
+                            return (
+                              <Link 
+                                href={itemHref} 
+                                className="link view-products-btn" 
+                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); selectNode(item); }}
+                              >
+                                View Products <span className="arrow-icon">&rarr;</span>
+                              </Link>
+                            );
+                          })()}
                         </div>
                       </div>
                     );

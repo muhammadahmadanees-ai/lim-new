@@ -27,7 +27,7 @@ import WhatsAppButton from './WhatsAppButton';
  * Receives server-fetched data as props so the catalog is never "Loading…"
  * for crawlers — the HTML is already rendered server-side.
  */
-const HomeClient = ({ initialCollections, initialProducts, initialSizes }) => {
+const HomeClient = ({ initialCollections, initialProducts, initialSizes, initialSection }) => {
   const [selectedCollection, setSelectedCollection] = useState(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   
@@ -116,7 +116,22 @@ const HomeClient = ({ initialCollections, initialProducts, initialSizes }) => {
       observer.observe(el);
     });
 
-    // Handle initial hash scrolling (e.g. /#visualizer, /#collections, /#faq, /#contact)
+    // Handle initial section from prop or URL pathname
+    const sectionToScroll = initialSection || (
+      typeof window !== 'undefined'
+        ? ['collections', 'visualizer', 'faq', 'contact'].find(s => window.location.pathname === `/${s}`)
+        : null
+    );
+    if (sectionToScroll) {
+      setTimeout(() => {
+        const targetEl = document.getElementById(sectionToScroll);
+        if (targetEl) {
+          targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 150);
+    }
+
+    // Convert legacy hash scrolling (e.g. /#visualizer) into clean path without '#'
     const handleHash = () => {
       const hash = window.location.hash;
       if (hash) {
@@ -125,6 +140,12 @@ const HomeClient = ({ initialCollections, initialProducts, initialSizes }) => {
         if (targetEl) {
           setTimeout(() => {
             targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            // Clean up the hash to clean URL
+            if (['collections', 'visualizer', 'faq', 'contact'].includes(targetId)) {
+              window.history.replaceState(null, '', `/${targetId}`);
+            } else {
+              window.history.replaceState(null, '', window.location.pathname);
+            }
           }, 150);
         }
       }
@@ -133,14 +154,34 @@ const HomeClient = ({ initialCollections, initialProducts, initialSizes }) => {
     handleHash();
     window.addEventListener('hashchange', handleHash);
 
+    // Handle browser back/forward buttons
+    const handlePopState = () => {
+      const path = window.location.pathname;
+      if (path === '/' || path === '/collections') {
+        setSelectedCollection(null);
+      }
+      const section = ['collections', 'visualizer', 'faq', 'contact'].find(s => path === `/${s}`);
+      if (section) {
+        const targetEl = document.getElementById(section);
+        if (targetEl) {
+          targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      } else if (path === '/') {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    };
+    window.addEventListener('popstate', handlePopState);
+
     return () => {
       window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('hashchange', handleHash);
+      window.removeEventListener('popstate', handlePopState);
     };
-  }, [selectedCollection]);
+  }, [selectedCollection, initialSection]);
 
   const handleResetToHome = () => {
     setSelectedCollection(null);
+    window.history.pushState(null, '', '/');
   };
 
   // Prepare visualizer tiles from the server-provided products

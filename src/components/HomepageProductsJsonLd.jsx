@@ -43,6 +43,13 @@ export default function HomepageProductsJsonLd({ collections, products }) {
       ? Array.from(allSizes).join(', ')
       : '30×30 cm, 60×60 cm, 60×120 cm, Custom';
 
+    const parent = (col.parent_id || col.parentId)
+      ? collections.find((c) => c.id === (col.parent_id || col.parentId))
+      : null;
+    const colUrl = parent
+      ? `${BASE_URL}/collections/${slugify(parent.name)}/${colSlug}`
+      : `${BASE_URL}/collections/${colSlug}`;
+
     return {
       '@type': 'Product',
       '@id': `${BASE_URL}/#product-${colSlug}`,
@@ -56,7 +63,7 @@ export default function HomepageProductsJsonLd({ collections, products }) {
       manufacturer: { '@id': `${BASE_URL}/#organization` },
       material: 'Recycled marble terrazzo',
       category: 'Terrazzo Tiles',
-      url: `${BASE_URL}/collections/${colSlug}`,
+      url: colUrl,
       additionalProperty: [
         {
           '@type': 'PropertyValue',

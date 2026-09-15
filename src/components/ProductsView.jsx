@@ -85,7 +85,17 @@ const ProductsView = ({ collectionData, onBack, onOpenProduct, onOpenLightbox })
     <section id="products-view" className="section">
       <div className="container">
         <div className="section-header">
-          <button id="back-to-collections" className="btn btn-outline" style={{ marginBottom: 'var(--spacing-md)' }} onClick={onBack}>
+          <button 
+            id="back-to-collections" 
+            className="btn btn-outline" 
+            style={{ marginBottom: 'var(--spacing-md)' }} 
+            onClick={() => {
+              if (typeof window !== 'undefined') {
+                window.history.pushState(null, '', '/collections');
+              }
+              onBack();
+            }}
+          >
             &larr; Back to Collections
           </button>
           <h2 id="products-view-title" style={{ fontWeight: 'bold' }}>{collectionData.name}</h2>
