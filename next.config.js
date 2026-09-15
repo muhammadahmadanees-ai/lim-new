@@ -20,6 +20,17 @@ const nextConfig = {
     unoptimized: false,
   },
 
+  // Redirect singular /collection/:path* to plural /collections/:path*
+  async redirects() {
+    return [
+      {
+        source: '/collection/:path*',
+        destination: '/collections/:path*',
+        permanent: true,
+      },
+    ];
+  },
+
   // Cache headers for static assets and proxied images (Section 6, Items 1-2)
   async headers() {
     return [
