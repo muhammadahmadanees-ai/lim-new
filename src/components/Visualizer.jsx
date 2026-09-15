@@ -2,7 +2,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { supabase, getAllProductsFromCache } from '../supabase';
 
-const Visualizer = () => {
+const Visualizer = ({ initialTiles }) => {
   const uploadAreaRef = useRef(null);
   const fileInputRef = useRef(null);
   const workspaceRef = useRef(null);
@@ -10,12 +10,15 @@ const Visualizer = () => {
   const opacityValRef = useRef(null);
   const scaleValRef = useRef(null);
 
-  const [tiles, setTiles] = useState([]);
+  const [tiles, setTiles] = useState(initialTiles || []);
   const [selectedTile, setSelectedTile] = useState(null);
   const [isTileLoading, setIsTileLoading] = useState(false);
   const preloadedImagesRef = useRef({});
 
   useEffect(() => {
+    // If we already have tiles from server props, skip fetching
+    if (initialTiles && initialTiles.length > 0) return;
+
     const setupTiles = (allProds) => {
       const validTiles = (allProds || []).filter(t => t.img && t.img.trim() !== '' && t.img !== 'null');
       setTiles(validTiles);
@@ -37,7 +40,7 @@ const Visualizer = () => {
       }
     };
     fetchTiles();
-  }, []);
+  }, [initialTiles]);
 
   useEffect(() => {
     const canvas = canvasRef.current;

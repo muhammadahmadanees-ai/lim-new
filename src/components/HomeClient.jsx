@@ -1,0 +1,241 @@
+"use client";
+import React, { useState, useEffect } from 'react';
+import { supabase, prefetchData, getProductByIdFromCache } from '../supabase';
+import Navbar from './Navbar';
+import Hero from './Hero';
+import Collections from './Collections';
+import ProductsView from './ProductsView';
+import Contact from './Contact';
+import Visualizer from './Visualizer';
+import FAQ from './FAQ';
+import Footer from './Footer';
+
+// Drawer & Modals
+import MenuDrawer from './MenuDrawer';
+import ProductModal from './ProductModal';
+import OrderModal from './OrderModal';
+import SampleFormModal from './SampleFormModal';
+import Lightbox from './Lightbox';
+import SearchModal from './SearchModal';
+import ScrollToTop from './ScrollToTop';
+import WhatsAppButton from './WhatsAppButton';
+
+/**
+ * HomeClient — Client Component
+ *
+ * Wraps all interactive homepage UI (modals, drawers, scroll effects).
+ * Receives server-fetched data as props so the catalog is never "Loading…"
+ * for crawlers — the HTML is already rendered server-side.
+ */
+const HomeClient = ({ initialCollections, initialProducts, initialSizes }) => {
+  const [selectedCollection, setSelectedCollection] = useState(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  
+  // Modal states
+  const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
+  const [isSampleFormOpen, setIsSampleFormOpen] = useState(false);
+  const [sampleProduct, setSampleProduct] = useState(null);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [lightboxImg, setLightboxImg] = useState(null);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+
+  const handleOpenProduct = async (prod) => {
+    let fullProd = prod;
+    if (!prod.desc || !prod.refcode || prod.refcode === 'N/A') {
+       const cached = getProductByIdFromCache(prod.id);
+       if (cached) {
+           fullProd = {
+             id: cached.id,
+             name: cached.name || cached.title || 'Unnamed',
+             desc: cached.description || cached.desc || cached.detail || '',
+             img: cached.imageurl || cached.imgurl || cached.image || cached.img || cached.pic || '',
+             sizesImg: cached.sizesimageurl || cached.sizeimage || cached.sizesimage || cached.sizepic || '',
+             sizes: cached.sizes || cached.size || cached.availablesizes || cached.available_sizes || cached['available sizes'] || cached['Available Sizes'] || '',
+             refcode: cached.refcode || cached.referencecode || cached.code || cached.refercode || '',
+             price: cached.price || cached.cost || ''
+           };
+       } else {
+           const { data } = await supabase.from('products').select('*').eq('id', prod.id).single();
+           if (data) {
+               fullProd = {
+                 id: data.id,
+                 name: data.name || data.title || 'Unnamed',
+                 desc: data.description || data.desc || data.detail || '',
+                 img: data.imageurl || data.imgurl || data.image || data.img || data.pic || '',
+                 sizesImg: data.sizesimageurl || data.sizeimage || data.sizesimage || data.sizepic || '',
+                 sizes: data.sizes || data.size || data.availablesizes || data.available_sizes || data['available sizes'] || data['Available Sizes'] || '',
+                 refcode: data.refcode || data.referencecode || data.code || data.refercode || '',
+                 price: data.price || data.cost || ''
+               };
+           }
+       }
+    }
+    setSelectedProduct(fullProd);
+    try {
+      let history = [];
+      const stored = localStorage.getItem('lim_recently_viewed');
+      if (stored) history = JSON.parse(stored);
+      history = history.filter(i => i.id !== fullProd.id);
+      history.unshift({ ...fullProd });
+      if (history.length > 5) history = history.slice(0, 5);
+      localStorage.setItem('lim_recently_viewed', JSON.stringify(history));
+      window.dispatchEvent(new Event('recentlyViewedUpdated'));
+    } catch(e) {}
+  };
+
+  useEffect(() => {
+    // Start prefetching data immediately on mount (for client-side cache)
+    prefetchData();
+
+    // Sticky Nav & Scroll handling
+    const navbar = document.getElementById('navbar');
+    const handleScroll = () => {
+      if (window.scrollY > 50) {
+        navbar?.classList.add('scrolled');
+      } else {
+        navbar?.classList.remove('scrolled');
+      }
+    };
+    window.addEventListener('scroll', handleScroll);
+
+    // Fade-in animations
+    const observer = new IntersectionObserver((entries, obs) => {
+      entries.forEach(entry => {
+          if (entry.isIntersecting) {
+              entry.target.style.opacity = '1';
+              entry.target.style.transform = 'translateY(0)';
+              obs.unobserve(entry.target);
+          }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.fade-in-up').forEach(el => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(30px)';
+      el.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+      observer.observe(el);
+    });
+
+    // Handle initial hash scrolling (e.g. /#visualizer, /#collections, /#faq, /#contact)
+    const handleHash = () => {
+      const hash = window.location.hash;
+      if (hash) {
+        const targetId = hash.replace('#', '');
+        const targetEl = document.getElementById(targetId);
+        if (targetEl) {
+          setTimeout(() => {
+            targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }, 150);
+        }
+      }
+    };
+
+    handleHash();
+    window.addEventListener('hashchange', handleHash);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('hashchange', handleHash);
+    };
+  }, [selectedCollection]);
+
+  const handleResetToHome = () => {
+    setSelectedCollection(null);
+  };
+
+  // Prepare visualizer tiles from the server-provided products
+  const visualizerTiles = (initialProducts || [])
+    .filter(p => p.img && p.img.trim() !== '' && p.img !== 'null')
+    .map(p => ({ id: p.id, name: p.name, img: p.img }));
+
+  return (
+    <div className="home-page">
+      <main>
+      <Navbar 
+        onOrderSamples={() => setIsOrderModalOpen(true)} 
+        onToggleDrawer={() => setIsDrawerOpen(true)}
+        onOpenSearch={() => setIsSearchOpen(true)}
+        onNavigate={handleResetToHome}
+      />
+      
+      <MenuDrawer 
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        onSelectCollection={setSelectedCollection}
+        onOpenProduct={handleOpenProduct}
+        onNavigate={handleResetToHome}
+      />
+      
+      <div style={{ display: !selectedCollection ? 'block' : 'none' }}>
+        <Hero />
+        <Collections
+          onSelectCollection={setSelectedCollection}
+          onOpenProduct={handleOpenProduct}
+          initialCollections={initialCollections}
+        />
+      </div>
+      
+      <div style={{ display: selectedCollection ? 'block' : 'none' }}>
+        <ProductsView 
+          collectionData={selectedCollection} 
+          onBack={() => setSelectedCollection(null)} 
+          onOpenProduct={handleOpenProduct}
+          onOpenLightbox={(img) => setLightboxImg(img)}
+        />
+      </div>
+      
+      <Visualizer initialTiles={visualizerTiles} />
+      <FAQ initialSizes={initialSizes} />
+      <Contact />
+      <Footer />
+
+      {/* Modals */}
+      {isOrderModalOpen && (
+        <OrderModal 
+          onClose={() => setIsOrderModalOpen(false)} 
+          onOpenSampleForm={() => {
+            setIsOrderModalOpen(false);
+            setSampleProduct(null);
+            setIsSampleFormOpen(true);
+          }} 
+        />
+      )}
+
+      {isSampleFormOpen && (
+        <SampleFormModal 
+          onClose={() => setIsSampleFormOpen(false)} 
+          initialProduct={sampleProduct}
+        />
+      )}
+
+      {isSearchOpen && (
+        <SearchModal 
+          onClose={() => setIsSearchOpen(false)}
+          onOpenProduct={handleOpenProduct}
+        />
+      )}
+
+      {selectedProduct && (
+        <ProductModal 
+          product={selectedProduct} 
+          onClose={() => setSelectedProduct(null)} 
+          onOpenLightbox={(img) => setLightboxImg(img)}
+          onOpenSampleForm={() => {
+            setSampleProduct(selectedProduct);
+            setSelectedProduct(null);
+            setIsSampleFormOpen(true);
+          }}
+        />
+      )}
+
+      {lightboxImg && (
+        <Lightbox img={lightboxImg} onClose={() => setLightboxImg(null)} />
+      )}
+      <ScrollToTop />
+      <WhatsAppButton />
+      </main>
+    </div>
+  );
+};
+
+export default HomeClient;

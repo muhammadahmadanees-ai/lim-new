@@ -5,7 +5,7 @@ import { supabase, fetchCollectionsCached, getCollectionsCache } from '../supaba
 import { slugify } from '../lib/slugify';
 import RecentlyViewed from './RecentlyViewed';
 
-const Collections = ({ onSelectCollection, onOpenProduct }) => {
+const Collections = ({ onSelectCollection, onOpenProduct, initialCollections }) => {
   // Construct hierarchy dynamically
   const buildTree = (items) => {
     const itemMap = {};
@@ -69,20 +69,23 @@ const Collections = ({ onSelectCollection, onOpenProduct }) => {
     return { cols, roots, initialExpanded };
   };
 
-  // Sync initialization to avoid flicker
-  const cachedSnapshot = getCollectionsCache();
-  const initialData = cachedSnapshot ? processCollectionsData(cachedSnapshot) : null;
+  // Sync initialization: prefer server-provided data, then client cache
+  const serverData = initialCollections && initialCollections.length > 0
+    ? processCollectionsData(initialCollections)
+    : null;
+  const cachedSnapshot = !serverData ? getCollectionsCache() : null;
+  const initialData = serverData || (cachedSnapshot ? processCollectionsData(cachedSnapshot) : null);
 
   const [collections, setCollections] = useState(initialData ? initialData.cols : []);
   const [treeRoots, setTreeRoots] = useState(initialData ? initialData.roots : []);
-  const [loading, setLoading] = useState(!cachedSnapshot);
+  const [loading, setLoading] = useState(!initialData);
   
   // Navigation states
   const [activeNode, setActiveNode] = useState(null); // Selected category node in tree
   const [expandedNodes, setExpandedNodes] = useState(initialData ? initialData.initialExpanded : {});
 
   useEffect(() => {
-    if (cachedSnapshot) return; // Skip if loaded from cache
+    if (serverData || cachedSnapshot) return; // Skip if loaded from server props or cache
 
     const fetchCollections = async () => {
       try {

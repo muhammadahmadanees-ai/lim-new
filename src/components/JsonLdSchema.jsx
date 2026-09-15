@@ -7,10 +7,10 @@
  * Entities included in the single @graph:
  *   - Organization (with @id, logo ImageObject, contactPoint array, social sameAs, and address)
  *   - WebSite (with @id and publisher reference)
- *   - WebPage (homepage node tying WebSite and Organization together)
+ *   - WebPage (homepage node tying WebSite and Organization together, with video reference)
  *   - FAQPage (Q&As drawn from shared faqData.js for visible parity)
- *   - Service ("Custom Terrazzo Flooring" offering)
- *   - VideoObject (hero video)
+ *   - Service ("Custom Terrazzo Flooring" offering with full catalog per Section 4.3)
+ *   - VideoObject (hero video with duration per Section 4.1)
  */
 
 import { FAQ_DATA } from '../data/faqData.js';
@@ -34,33 +34,37 @@ function buildJsonLdGraph() {
     },
     image: `${BASE_URL}/tiles_cover.png`,
     description:
-      'LIM Factory designs and manufactures premium terrazzo tiles and terrazzo chip tiles handcrafted from 100% recycled marble, offering custom terrazzo flooring for residential and commercial spaces.',
+      'LIM Factory handcrafts premium terrazzo tiles and terrazzo chips tiles from 100% recycled marble, offering custom terrazzo flooring for residential and commercial spaces across Asia.',
     email: 'limfactoryy@gmail.com',
     telephone: '+92-316-4934687',
-    sameAs: ['https://www.instagram.com/terrazzobylimfactory'],
-    address: {
-      '@type': 'PostalAddress',
-      addressLocality: 'Lahore',
-      addressRegion: 'Punjab',
-      addressCountry: 'PK',
-    },
     contactPoint: [
       {
         '@type': 'ContactPoint',
         telephone: '+92-316-4934687',
-        contactType: 'customer service',
+        contactType: 'sales',
         email: 'limfactoryy@gmail.com',
         areaServed: 'Worldwide',
-        availableLanguage: ['en', 'ur'],
+        availableLanguage: ['English', 'Urdu'],
       },
       {
         '@type': 'ContactPoint',
         telephone: '+92-333-7000737',
-        contactType: 'sales',
+        contactType: 'customer service',
         areaServed: 'Worldwide',
-        availableLanguage: ['en', 'ur'],
+        availableLanguage: ['English', 'Urdu'],
       },
     ],
+    sameAs: [
+      'https://www.instagram.com/terrazzobylimfactory',
+      'https://wa.me/923164934687',
+    ],
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: 'Main Road Lahore–Kasur Road',
+      addressLocality: 'Kasur',
+      addressRegion: 'Punjab',
+      addressCountry: 'PK',
+    },
   };
 
   const webSite = {
@@ -80,7 +84,7 @@ function buildJsonLdGraph() {
     url: `${BASE_URL}/`,
     name: 'LIM Factory | Premium Terrazzo Tiles & Terrazzo Chips Tiles',
     description:
-      'Buy premium terrazzo tiles and terrazzo chips tiles handcrafted from 100% recycled marble. LIM Factory offers custom terrazzo flooring for residential & commercial spaces across Asia. Request free samples today.',
+      'Buy premium terrazzo tiles and terrazzo chips tiles handcrafted from 100% recycled marble. Custom terrazzo flooring for residential & commercial spaces across Asia.',
     isPartOf: { '@id': `${BASE_URL}/#website` },
     about: { '@id': `${BASE_URL}/#organization` },
     primaryImageOfPage: {
@@ -90,13 +94,13 @@ function buildJsonLdGraph() {
       height: 630,
     },
     inLanguage: 'en-US',
+    video: { '@id': `${BASE_URL}/#herovideo` },
   };
 
   const faqPage = {
     '@type': 'FAQPage',
     '@id': `${BASE_URL}/#faq`,
-    isPartOf: { '@id': `${BASE_URL}/#website` },
-    about: { '@id': `${BASE_URL}/#organization` },
+    mainEntityOfPage: { '@id': `${BASE_URL}/#webpage` },
     mainEntity: FAQ_DATA.map((faq) => ({
       '@type': 'Question',
       name: faq.question,
@@ -109,40 +113,46 @@ function buildJsonLdGraph() {
 
   const service = {
     '@type': 'Service',
-    serviceType: 'Custom Terrazzo Flooring',
+    '@id': `${BASE_URL}/#service-custom-terrazzo`,
+    serviceType: 'Custom Terrazzo Flooring Consultation',
     name: 'Custom Terrazzo Flooring by LIM Factory',
     description:
-      'Custom terrazzo flooring and terrazzo chip tile manufacturing for residential and commercial spaces, in standard or fully custom sizes.',
+      'Custom-sized terrazzo tile solutions for residential and commercial flooring projects, handcrafted from 100% recycled marble.',
     provider: { '@id': `${BASE_URL}/#organization` },
     areaServed: {
       '@type': 'Place',
       name: 'Worldwide',
     },
-    audience: {
-      '@type': 'Audience',
-      audienceType: [
-        'Homeowners',
-        'Architects',
-        'Interior Designers',
-        'Commercial Developers',
-      ],
-    },
     hasOfferCatalog: {
       '@type': 'OfferCatalog',
-      name: 'Terrazzo Collections',
+      name: 'LIM Factory Services',
       itemListElement: [
         {
           '@type': 'Offer',
           itemOffered: {
             '@type': 'Service',
-            name: 'Custom Size Terrazzo Tiles',
+            name: 'Free Sample Ordering',
           },
         },
         {
           '@type': 'Offer',
           itemOffered: {
             '@type': 'Service',
-            name: 'Sample Ordering',
+            name: 'Room Visualizer Consultation',
+          },
+        },
+        {
+          '@type': 'Offer',
+          itemOffered: {
+            '@type': 'Service',
+            name: 'Custom Tile Sizing',
+          },
+        },
+        {
+          '@type': 'Offer',
+          itemOffered: {
+            '@type': 'Service',
+            name: 'International Shipping',
           },
         },
       ],
@@ -151,11 +161,13 @@ function buildJsonLdGraph() {
 
   const videoObject = {
     '@type': 'VideoObject',
-    name: 'LIM Factory — Handcrafted Terrazzo Tile Process',
+    '@id': `${BASE_URL}/#herovideo`,
+    name: 'LIM Factory — Handcrafted Terrazzo Tiles Showcase',
     description:
-      'A look at LIM Factory\'s handcrafted terrazzo tile production from 100% recycled marble.',
+      'A showcase of LIM Factory\'s handcrafted terrazzo tiles, made from 100% recycled marble, for residential and commercial flooring.',
     thumbnailUrl: [`${BASE_URL}/tiles_cover.png`],
     uploadDate: '2026-01-15',
+    duration: 'PT0M28S',
     contentUrl:
       'https://res.cloudinary.com/doiujqcpw/video/upload/v1780236097/IMG_0671_cektka.mp4',
     publisher: { '@id': `${BASE_URL}/#organization` },

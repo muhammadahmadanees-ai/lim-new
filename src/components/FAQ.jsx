@@ -18,10 +18,14 @@ const FAQItem = ({ question, answer }) => {
   );
 };
 
-const FAQ = () => {
-  const [dynamicSizes, setDynamicSizes] = useState('<strong>30×30 cm</strong>, <strong>60×60 cm</strong>, and <strong>60×120 cm</strong>');
+const FAQ = ({ initialSizes }) => {
+  const fallbackSizes = '<strong>30×30 cm</strong>, <strong>60×60 cm</strong>, and <strong>60×120 cm</strong>';
+  const [dynamicSizes, setDynamicSizes] = useState(initialSizes || fallbackSizes);
 
   useEffect(() => {
+    // Skip client-side fetch if server already provided sizes
+    if (initialSizes) return;
+
     const fetchSizes = async () => {
       try {
         const { data: colSnap, error: colError } = await supabase.from('collections').select('*');
