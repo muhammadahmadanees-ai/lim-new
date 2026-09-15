@@ -27,8 +27,8 @@ function buildJsonLdGraph() {
     logo: {
       '@type': 'ImageObject',
       '@id': `${BASE_URL}/#logo`,
-      url: `${process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://kagimdnkyqfduhcbkceo.supabase.co'}/storage/v1/object/public/images/lim_transparent_logo.png`,
-      contentUrl: `${process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://kagimdnkyqfduhcbkceo.supabase.co'}/storage/v1/object/public/images/lim_transparent_logo.png`,
+      url: `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/images/lim_transparent_logo.png`,
+      contentUrl: `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/images/lim_transparent_logo.png`,
       width: '512',
       height: '512',
     },
@@ -166,7 +166,7 @@ function buildJsonLdGraph() {
     description:
       'A showcase of LIM Factory\'s handcrafted terrazzo tiles, made from 100% recycled marble, for residential and commercial flooring.',
     thumbnailUrl: [`${BASE_URL}/tiles_cover.png`],
-    uploadDate: '2026-01-15',
+    uploadDate: '2026-01-15T08:00:00+00:00',
     duration: 'PT0M28S',
     contentUrl:
       'https://res.cloudinary.com/doiujqcpw/video/upload/v1780236097/IMG_0671_cektka.mp4',

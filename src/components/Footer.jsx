@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from 'react';
+import Link from 'next/link';
 import TermsModal from './TermsModal';
 import PrivacyModal from './PrivacyModal';
 
@@ -15,8 +16,8 @@ const Footer = () => {
           <p>&copy; 2026 LIM Factory. All rights reserved.</p>
         </div>
         <div className="footer-links">
-          <a href="#" onClick={(e) => { e.preventDefault(); setIsPrivacyOpen(true); }}>Privacy Policy</a>
-          <a href="#" onClick={(e) => { e.preventDefault(); setIsTermsOpen(true); }}>Terms of Service</a>
+          <Link href="/privacy-policy">Privacy Policy</Link>
+          <Link href="/terms-of-service">Terms of Service</Link>
           <a href="https://www.instagram.com/terrazzobylimfactory" target="_blank" rel="noreferrer">Instagram</a>
         </div>
       </div>

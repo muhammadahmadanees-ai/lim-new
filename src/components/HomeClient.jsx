@@ -164,6 +164,8 @@ const HomeClient = ({ initialCollections, initialProducts, initialSizes }) => {
         onSelectCollection={setSelectedCollection}
         onOpenProduct={handleOpenProduct}
         onNavigate={handleResetToHome}
+        initialCollections={initialCollections}
+        initialProducts={initialProducts}
       />
       
       <div style={{ display: !selectedCollection ? 'block' : 'none' }}>

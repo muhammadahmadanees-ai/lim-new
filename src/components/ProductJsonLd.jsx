@@ -86,7 +86,7 @@ export default function ProductJsonLd({ product, collection, breadcrumbs }) {
     : undefined;
 
   if (productUrl) {
-    productSchema['@id'] = `${productUrl}#product`;
+    productSchema['@id'] = productUrl;
     productSchema.url = productUrl;
   }
 

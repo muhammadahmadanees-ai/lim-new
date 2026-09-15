@@ -3,94 +3,136 @@ import React, { useEffect, useState, useRef } from 'react';
 import { supabase } from '../supabase';
 import RecentlyViewed from './RecentlyViewed';
 
-const MenuDrawer = ({ isOpen, onClose, onSelectCollection, onOpenProduct, onNavigate }) => {
-  const [collections, setCollections] = useState([]);
-  const [treeRoots, setTreeRoots] = useState([]);
-  const [allProducts, setAllProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+// Construct hierarchy dynamically
+const buildTree = (items) => {
+  const itemMap = {};
+  const roots = [];
+
+  items.forEach(item => {
+    itemMap[item.id] = { ...item, children: [] };
+  });
+
+  items.forEach(item => {
+    const mapped = itemMap[item.id];
+    if (mapped.parentId && itemMap[mapped.parentId]) {
+      itemMap[mapped.parentId].children.push(mapped);
+    } else {
+      roots.push(mapped);
+    }
+  });
+
+  const sortTree = (node) => {
+    if (node.children) {
+      node.children.sort((a, b) => (a.order || 0) - (b.order || 0));
+      node.children.forEach(sortTree);
+    }
+  };
+  roots.forEach(sortTree);
+  roots.sort((a, b) => (a.order || 0) - (b.order || 0));
+  return roots;
+};
+
+const processCollections = (rawItems) => {
+  const cols = [];
+  rawItems.forEach((rawData) => {
+    const data = {};
+    for (let key in rawData) {
+      const cleanKey = key.toLowerCase().replace(/[\s_]+/g, '');
+      data[cleanKey] = rawData[key];
+    }
+    cols.push({
+      id: rawData.id,
+      name: data.name || data.title || 'Unnamed',
+      desc: data.description || data.desc || data.detail || '',
+      img: data.img || data.imageurl || data.imgurl || data.image || data.pic || '',
+      parentId: data.parentid || '',
+      type: data.type || 'collection',
+      order: data.order !== undefined ? Number(data.order) : 0
+    });
+  });
+
+  const roots = buildTree(cols);
+  const initialExpanded = {};
+  roots.forEach(r => {
+    initialExpanded[r.id] = true;
+    if (r.children) {
+      r.children.forEach(c => {
+        initialExpanded[c.id] = true;
+      });
+    }
+  });
+  return { cols, roots, initialExpanded };
+};
+
+const MenuDrawer = ({ isOpen, onClose, onSelectCollection, onOpenProduct, onNavigate, initialCollections, initialProducts }) => {
+  const initialProcessed = initialCollections && initialCollections.length > 0
+    ? processCollections(initialCollections)
+    : null;
+
+  const [collections, setCollections] = useState(initialProcessed ? initialProcessed.cols : []);
+  const [treeRoots, setTreeRoots] = useState(initialProcessed ? initialProcessed.roots : []);
+  const [allProducts, setAllProducts] = useState(initialProducts || []);
+  const [loading, setLoading] = useState(!initialProcessed);
 
   // Search state
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
-  const [expandedNodes, setExpandedNodes] = useState({});
+  const [expandedNodes, setExpandedNodes] = useState(initialProcessed ? initialProcessed.initialExpanded : {});
 
   const drawerRef = useRef(null);
 
   useEffect(() => {
     if (!isOpen) return;
+    if (collections.length > 0 && allProducts.length > 0) return; // already loaded from server props
 
     const fetchAllData = async () => {
       try {
         setLoading(true);
-        // 1. Fetch Collections
-        const { data: querySnapshot, error } = await supabase.from('collections').select('*').order('order');
-        if (error) throw error;
-        
-        const cols = [];
-        querySnapshot.forEach((rawData) => {
-          const data = {};
-          for (let key in rawData) {
-              const cleanKey = key.toLowerCase().replace(/[\s_]+/g, '');
-              data[cleanKey] = rawData[key];
-          }
-          cols.push({
-            id: rawData.id,
-            name: data.name || data.title || 'Unnamed',
-            desc: data.description || data.desc || data.detail || '',
-            img: data.img || data.imageurl || data.imgurl || data.image || data.pic || '',
-            parentId: data.parentid || '',
-            type: data.type || 'collection',
-            order: data.order !== undefined ? Number(data.order) : 0
-          });
-        });
-
-        setCollections(cols);
-        const roots = buildTree(cols);
-        setTreeRoots(roots);
-
-        // Auto-expand top levels
-        const initialExpanded = {};
-        roots.forEach(r => {
-          initialExpanded[r.id] = true;
-          if (r.children) {
-            r.children.forEach(c => {
-              initialExpanded[c.id] = true;
-            });
-          }
-        });
-        setExpandedNodes(initialExpanded);
-
-        // 2. Fetch all products from all collections for search indexing
-        const productsIndex = [];
-        for (const col of cols) {
-          if (col.type === 'category') continue; // only leaf collections hold products
-          try {
-            const { data: pSnapshot, error: pError } = await supabase.from('products').select('*').eq('collection_id', col.id).order('order');
-            if (pError) throw pError;
-            
-            pSnapshot.forEach((rawData) => {
-              const pData = {};
-              for (let key in rawData) {
-                  const cleanKey = key.toLowerCase().replace(/[\s_]+/g, '');
-                  pData[cleanKey] = rawData[key];
-              }
-              productsIndex.push({
-                id: rawData.id,
-                name: pData.name || pData.title || 'Unnamed',
-                desc: pData.description || pData.desc || pData.detail || '',
-                img: pData.img || pData.imageurl || pData.imgurl || pData.image || pData.pic || '',
-                price: pData.price || pData.cost || '',
-                refcode: pData.refcode || pData.referencecode || pData.code || '',
-                sizes: pData.sizes || pData.size || pData.availablesizes || pData.available_sizes || '',
-                collectionId: col.id,
-                collectionName: col.name
-              });
-            });
-          } catch (pe) {
-            console.warn(`Could not index products for collection ${col.name}:`, pe);
-          }
+        // 1. Fetch Collections if not available
+        let cols = collections;
+        if (cols.length === 0) {
+          const { data: querySnapshot, error } = await supabase.from('collections').select('*').order('order');
+          if (error) throw error;
+          const processed = processCollections(querySnapshot);
+          cols = processed.cols;
+          setCollections(cols);
+          setTreeRoots(processed.roots);
+          setExpandedNodes(processed.initialExpanded);
         }
-        setAllProducts(productsIndex);
+
+        // 2. Fetch all products from all collections for search indexing if not available
+        if (allProducts.length === 0) {
+          const productsIndex = [];
+          for (const col of cols) {
+            if (col.type === 'category') continue; // only leaf collections hold products
+            try {
+              const { data: pSnapshot, error: pError } = await supabase.from('products').select('*').eq('collection_id', col.id).order('order');
+              if (pError) throw pError;
+              
+              pSnapshot.forEach((rawData) => {
+                const pData = {};
+                for (let key in rawData) {
+                    const cleanKey = key.toLowerCase().replace(/[\s_]+/g, '');
+                    pData[cleanKey] = rawData[key];
+                }
+                productsIndex.push({
+                  id: rawData.id,
+                  name: pData.name || pData.title || 'Unnamed',
+                  desc: pData.description || pData.desc || pData.detail || '',
+                  img: pData.img || pData.imageurl || pData.imgurl || pData.image || pData.pic || '',
+                  price: pData.price || pData.cost || '',
+                  refcode: pData.refcode || pData.referencecode || pData.code || '',
+                  sizes: pData.sizes || pData.size || pData.availablesizes || pData.available_sizes || '',
+                  collectionId: col.id,
+                  collectionName: col.name
+                });
+              });
+            } catch (pe) {
+              console.warn(`Could not index products for collection ${col.name}:`, pe);
+            }
+          }
+          setAllProducts(productsIndex);
+        }
 
       } catch (err) {
         console.error("Error fetching data for menu drawer:", err);
@@ -100,7 +142,7 @@ const MenuDrawer = ({ isOpen, onClose, onSelectCollection, onOpenProduct, onNavi
     };
 
     fetchAllData();
-  }, [isOpen]);
+  }, [isOpen, collections.length, allProducts.length]);
 
   // Handle Search filtering
   useEffect(() => {
@@ -127,34 +169,6 @@ const MenuDrawer = ({ isOpen, onClose, onSelectCollection, onOpenProduct, onNavi
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [onClose]);
-
-  const buildTree = (items) => {
-    const itemMap = {};
-    const roots = [];
-
-    items.forEach(item => {
-      itemMap[item.id] = { ...item, children: [] };
-    });
-
-    items.forEach(item => {
-      const mapped = itemMap[item.id];
-      if (mapped.parentId && itemMap[mapped.parentId]) {
-        itemMap[mapped.parentId].children.push(mapped);
-      } else {
-        roots.push(mapped);
-      }
-    });
-
-    const sortTree = (node) => {
-      if (node.children) {
-        node.children.sort((a, b) => (a.order || 0) - (b.order || 0));
-        node.children.forEach(sortTree);
-      }
-    };
-    roots.forEach(sortTree);
-    roots.sort((a, b) => (a.order || 0) - (b.order || 0));
-    return roots;
-  };
 
   const toggleExpand = (nodeId, e) => {
     e.stopPropagation();
