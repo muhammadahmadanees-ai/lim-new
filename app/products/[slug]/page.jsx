@@ -8,6 +8,7 @@
 
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   fetchAllProducts,
   fetchAllCollections,
@@ -137,9 +138,8 @@ export default async function ProductPage({ params }) {
         })
       : PREDEFINED_SIZES;
 
-  // Build breadcrumbs
+  // Build breadcrumbs matching visible trail
   const breadcrumbs = [{ name: 'Home', url: BASE_URL }];
-  breadcrumbs.push({ name: 'Collections', url: `${BASE_URL}/#collections` });
   if (parentCategory) {
     breadcrumbs.push({
       name: parentCategory.name,
@@ -182,7 +182,7 @@ export default async function ProductPage({ params }) {
           <div className="container nav-container mobile-nav-layout">
             <Link href="/" className="logo nav-mobile-center">
               <img
-                src="https://wqkdkypfpgvubxfzokmg.supabase.co/storage/v1/object/public/images/lim_transparent_logo.png"
+                src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/images/lim_transparent_logo.png`}
                 alt="LIM Factory Logo"
                 className="logo-img"
               />
@@ -273,13 +273,17 @@ export default async function ProductPage({ params }) {
                 }}
               >
                 {imgUrl ? (
-                  <img
+                  <Image
                     src={imgUrl}
                     alt={`${prodName} — terrazzo tile by LIM Factory`}
+                    width={500}
+                    height={500}
+                    priority
                     style={{
                       maxWidth: '100%',
                       maxHeight: '500px',
                       objectFit: 'contain',
+                      height: 'auto',
                     }}
                   />
                 ) : (
@@ -486,16 +490,12 @@ export default async function ProductPage({ params }) {
                           }}
                         >
                           {rpImg ? (
-                            <img
+                            <Image
                               src={rpImg}
                               alt={`${rpName} — terrazzo tile by LIM Factory`}
-                              loading="lazy"
+                              fill
+                              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                               style={{
-                                position: 'absolute',
-                                top: 0,
-                                left: 0,
-                                width: '100%',
-                                height: '100%',
                                 objectFit: 'contain',
                                 padding: '1.5rem',
                                 boxSizing: 'border-box',

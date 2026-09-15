@@ -1,18 +1,13 @@
-/** @type {import('next').NextConfig} */
+const supabaseHostname = process.env.NEXT_PUBLIC_SUPABASE_URL
+  ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).hostname
+  : 'kagimdnkyqfduhcbkceo.supabase.co';
+
 const nextConfig = {
   images: {
-    // Enable Next.js Image Optimization for remote images
-    // This automatically converts images to WebP/AVIF and serves responsive sizes,
-    // reducing bandwidth significantly (Section 6, Item 4)
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'kagimdnkyqfduhcbkceo.supabase.co',
-        pathname: '/storage/v1/object/public/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'wqkdkypfpgvubxfzokmg.supabase.co',
+        hostname: supabaseHostname,
         pathname: '/storage/v1/object/public/**',
       },
       {
@@ -21,9 +16,8 @@ const nextConfig = {
         pathname: '/**',
       },
     ],
-    // Keep unoptimized for now to avoid breaking existing <img> tags in client components.
-    // Server-rendered subpages can use <Image> individually.
-    unoptimized: true,
+    // Enable Next.js Image Optimization to proxy and cache remote Supabase images at edge
+    unoptimized: false,
   },
 
   // Cache headers for static assets and proxied images (Section 6, Items 1-2)

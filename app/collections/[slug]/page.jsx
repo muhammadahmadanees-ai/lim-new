@@ -8,6 +8,7 @@
 
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { fetchAllCollections, fetchProductsByCollection } from '../../../src/lib/supabase-server';
 import { slugify } from '../../../src/lib/slugify';
 
@@ -142,7 +143,7 @@ export default async function CollectionPage({ params }) {
           <div className="container nav-container mobile-nav-layout">
             <Link href="/" className="logo nav-mobile-center">
               <img
-                src="https://wqkdkypfpgvubxfzokmg.supabase.co/storage/v1/object/public/images/lim_transparent_logo.png"
+                src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/images/lim_transparent_logo.png`}
                 alt="LIM Factory Logo"
                 className="logo-img"
               />
@@ -248,16 +249,12 @@ export default async function CollectionPage({ params }) {
                         }}
                       >
                         {imgUrl ? (
-                          <img
+                          <Image
                             src={imgUrl}
                             alt={`${prodName} — terrazzo tile by LIM Factory`}
-                            loading="lazy"
+                            fill
+                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                             style={{
-                              position: 'absolute',
-                              top: 0,
-                              left: 0,
-                              width: '100%',
-                              height: '100%',
                               objectFit: 'contain',
                               padding: '1.5rem',
                               boxSizing: 'border-box',
