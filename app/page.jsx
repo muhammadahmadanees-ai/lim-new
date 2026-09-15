@@ -1,225 +1,76 @@
-"use client";
-import React, { useState, useEffect } from 'react';
-import { supabase, prefetchData, getProductByIdFromCache } from '../src/supabase';
-import Navbar from '../src/components/Navbar';
-import Hero from '../src/components/Hero';
-import Collections from '../src/components/Collections';
-import ProductsView from '../src/components/ProductsView';
-import Contact from '../src/components/Contact';
-import Visualizer from '../src/components/Visualizer';
-import FAQ from '../src/components/FAQ';
-import Footer from '../src/components/Footer';
+/**
+ * Homepage — Server Component (SSR/ISR)
+ *
+ * Fetches collections and products server-side from Supabase, then passes
+ * the data to <HomeClient> (client component) as serializable props.
+ *
+ * This eliminates the "Loading collections catalog..." and "Loading tiles..."
+ * placeholder text that crawlers previously saw — the HTML now contains
+ * real catalog data in the initial server response.
+ *
+ * Also injects server-rendered Product/ItemList JSON-LD for SEO (Section 4.2).
+ *
+ * ISR revalidates every hour so Supabase is queried at most once per hour,
+ * not once per visitor — dramatically reducing egress bandwidth.
+ */
 
-// Drawer & Modals
-import MenuDrawer from '../src/components/MenuDrawer';
-import ProductModal from '../src/components/ProductModal';
-import OrderModal from '../src/components/OrderModal';
-import SampleFormModal from '../src/components/SampleFormModal';
-import Lightbox from '../src/components/Lightbox';
-import SearchModal from '../src/components/SearchModal';
-import ScrollToTop from '../src/components/ScrollToTop';
-import WhatsAppButton from '../src/components/WhatsAppButton';
+import { fetchAllCollections, fetchAllProducts } from '../src/lib/supabase-server';
+import HomeClient from '../src/components/HomeClient';
+import HomepageProductsJsonLd from '../src/components/HomepageProductsJsonLd';
 
-const Home = () => {
-  const [selectedCollection, setSelectedCollection] = useState(null);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  
-  // Modal states
-  const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
-  const [isSampleFormOpen, setIsSampleFormOpen] = useState(false);
-  const [sampleProduct, setSampleProduct] = useState(null);
-  const [selectedProduct, setSelectedProduct] = useState(null);
-  const [lightboxImg, setLightboxImg] = useState(null);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
+export const revalidate = 3600; // ISR: revalidate every 1 hour
 
-  const handleOpenProduct = async (prod) => {
-    let fullProd = prod;
-    if (!prod.desc || !prod.refcode || prod.refcode === 'N/A') {
-       const cached = getProductByIdFromCache(prod.id);
-       if (cached) {
-           fullProd = {
-             id: cached.id,
-             name: cached.name || cached.title || 'Unnamed',
-             desc: cached.description || cached.desc || cached.detail || '',
-             img: cached.imageurl || cached.imgurl || cached.image || cached.img || cached.pic || '',
-             sizesImg: cached.sizesimageurl || cached.sizeimage || cached.sizesimage || cached.sizepic || '',
-             sizes: cached.sizes || cached.size || cached.availablesizes || cached.available_sizes || cached['available sizes'] || cached['Available Sizes'] || '',
-             refcode: cached.refcode || cached.referencecode || cached.code || cached.refercode || '',
-             price: cached.price || cached.cost || ''
-           };
-       } else {
-           const { data } = await supabase.from('products').select('*').eq('id', prod.id).single();
-           if (data) {
-               fullProd = {
-                 id: data.id,
-                 name: data.name || data.title || 'Unnamed',
-                 desc: data.description || data.desc || data.detail || '',
-                 img: data.imageurl || data.imgurl || data.image || data.img || data.pic || '',
-                 sizesImg: data.sizesimageurl || data.sizeimage || data.sizesimage || data.sizepic || '',
-                 sizes: data.sizes || data.size || data.availablesizes || data.available_sizes || data['available sizes'] || data['Available Sizes'] || '',
-                 refcode: data.refcode || data.referencecode || data.code || data.refercode || '',
-                 price: data.price || data.cost || ''
-               };
-           }
-       }
-    }
-    setSelectedProduct(fullProd);
-    try {
-      let history = [];
-      const stored = localStorage.getItem('lim_recently_viewed');
-      if (stored) history = JSON.parse(stored);
-      history = history.filter(i => i.id !== fullProd.id);
-      history.unshift({ ...fullProd });
-      if (history.length > 5) history = history.slice(0, 5);
-      localStorage.setItem('lim_recently_viewed', JSON.stringify(history));
-      window.dispatchEvent(new Event('recentlyViewedUpdated'));
-    } catch(e) {}
-  };
+export default async function HomePage() {
+  let collections = [];
+  let products = [];
 
-  useEffect(() => {
-    // Start prefetching data immediately on mount
-    prefetchData();
+  try {
+    [collections, products] = await Promise.all([
+      fetchAllCollections(),
+      fetchAllProducts(),
+    ]);
+  } catch (error) {
+    console.error('Error fetching homepage data:', error);
+    // Fallback: let client components fetch their own data
+  }
 
-    // Sticky Nav & Scroll handling
-    const navbar = document.getElementById('navbar');
-    const handleScroll = () => {
-      if (window.scrollY > 50) {
-        navbar?.classList.add('scrolled');
-      } else {
-        navbar?.classList.remove('scrolled');
-      }
-    };
-    window.addEventListener('scroll', handleScroll);
-
-    // Fade-in animations
-    const observer = new IntersectionObserver((entries, obs) => {
-      entries.forEach(entry => {
-          if (entry.isIntersecting) {
-              entry.target.style.opacity = '1';
-              entry.target.style.transform = 'translateY(0)';
-              obs.unobserve(entry.target);
-          }
+  // Pre-compute dynamic sizes for FAQ (avoids extra client-side Supabase query)
+  const allSizes = new Set();
+  products.forEach((prod) => {
+    const sizes =
+      prod.sizes || prod.size || prod.availablesizes || prod.available_sizes || '';
+    if (typeof sizes === 'string' && sizes.trim()) {
+      sizes.split(',').forEach((s) => {
+        const trimmed = s.trim();
+        if (trimmed) allSizes.add(trimmed);
       });
-    }, { threshold: 0.1 });
-
-    document.querySelectorAll('.fade-in-up').forEach(el => {
-      el.style.opacity = '0';
-      el.style.transform = 'translateY(30px)';
-      el.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
-      observer.observe(el);
-    });
-
-    // Handle initial hash scrolling (e.g. /#visualizer, /#collections, /#faq, /#contact)
-    const handleHash = () => {
-      const hash = window.location.hash;
-      if (hash) {
-        const targetId = hash.replace('#', '');
-        const targetEl = document.getElementById(targetId);
-        if (targetEl) {
-          setTimeout(() => {
-            targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          }, 150);
-        }
-      }
-    };
-
-    handleHash();
-    window.addEventListener('hashchange', handleHash);
-
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('hashchange', handleHash);
-    };
-  }, [selectedCollection]);
-
-  const handleResetToHome = () => {
-    setSelectedCollection(null);
-  };
+    }
+  });
+  const sizesArray = Array.from(allSizes).filter((s) => s.length > 0);
+  let initialSizes = null;
+  if (sizesArray.length > 0) {
+    const formatted = sizesArray.map((s) => `<strong>${s.replace(/x/gi, '×')} cm</strong>`);
+    if (formatted.length === 1) {
+      initialSizes = formatted[0];
+    } else if (formatted.length === 2) {
+      initialSizes = `${formatted[0]} and ${formatted[1]}`;
+    } else {
+      const last = formatted.pop();
+      initialSizes = `${formatted.join(', ')}, and ${last}`;
+    }
+  }
 
   return (
-    <div className="home-page">
-      <main>
-      <Navbar 
-        onOrderSamples={() => setIsOrderModalOpen(true)} 
-        onToggleDrawer={() => setIsDrawerOpen(true)}
-        onOpenSearch={() => setIsSearchOpen(true)}
-        onNavigate={handleResetToHome}
+    <>
+      {/* Server-rendered Product/ItemList JSON-LD (invisible markup in <head>) */}
+      <HomepageProductsJsonLd collections={collections} products={products} />
+
+      {/* Client-side interactive homepage shell with server-fetched data */}
+      <HomeClient
+        initialCollections={collections}
+        initialProducts={products}
+        initialSizes={initialSizes}
       />
-      
-      <MenuDrawer 
-        isOpen={isDrawerOpen}
-        onClose={() => setIsDrawerOpen(false)}
-        onSelectCollection={setSelectedCollection}
-        onOpenProduct={handleOpenProduct}
-        onNavigate={handleResetToHome}
-      />
-      
-      <div style={{ display: !selectedCollection ? 'block' : 'none' }}>
-        <Hero />
-        <Collections onSelectCollection={setSelectedCollection} onOpenProduct={handleOpenProduct} />
-      </div>
-      
-      <div style={{ display: selectedCollection ? 'block' : 'none' }}>
-        <ProductsView 
-          collectionData={selectedCollection} 
-          onBack={() => setSelectedCollection(null)} 
-          onOpenProduct={handleOpenProduct}
-          onOpenLightbox={(img) => setLightboxImg(img)}
-        />
-      </div>
-      
-      <Visualizer />
-      <FAQ />
-      <Contact />
-      <Footer />
-
-      {/* Modals */}
-      {isOrderModalOpen && (
-        <OrderModal 
-          onClose={() => setIsOrderModalOpen(false)} 
-          onOpenSampleForm={() => {
-            setIsOrderModalOpen(false);
-            setSampleProduct(null);
-            setIsSampleFormOpen(true);
-          }} 
-        />
-      )}
-
-      {isSampleFormOpen && (
-        <SampleFormModal 
-          onClose={() => setIsSampleFormOpen(false)} 
-          initialProduct={sampleProduct}
-        />
-      )}
-
-      {isSearchOpen && (
-        <SearchModal 
-          onClose={() => setIsSearchOpen(false)}
-          onOpenProduct={handleOpenProduct}
-        />
-      )}
-
-      {selectedProduct && (
-        <ProductModal 
-          product={selectedProduct} 
-          onClose={() => setSelectedProduct(null)} 
-          onOpenLightbox={(img) => setLightboxImg(img)}
-          onOpenSampleForm={() => {
-            setSampleProduct(selectedProduct);
-            setSelectedProduct(null);
-            setIsSampleFormOpen(true);
-          }}
-        />
-      )}
-
-      {lightboxImg && (
-        <Lightbox img={lightboxImg} onClose={() => setLightboxImg(null)} />
-      )}
-      <ScrollToTop />
-      <WhatsAppButton />
-      </main>
-    </div>
+    </>
   );
-};
-
-export default Home;
+}
